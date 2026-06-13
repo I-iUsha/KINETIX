@@ -90,7 +90,7 @@ export function Menubar({ projectName, assetCount, onNew, onOpenWdf, onImport, o
       { label: 'New bake…', onClick: onNew },
     ],
     Help: [
-      { label: 'Documentation', onClick: () => window.open('https://github.com/zajalist/KINETIX', '_blank', 'noopener') },
+      { label: 'Documentation', onClick: () => window.open('https://github.com/I-iUsha/KINETIX', '_blank', 'noopener') },
       'sep',
       { label: 'About kinetiX', onClick: () => setAbout(true) },
     ],

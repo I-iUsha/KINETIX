@@ -3,7 +3,8 @@ import { Icon } from './Icons'
 import { DragField } from './DragField'
 import { SearchSelect } from './SearchSelect'
 import { MATERIAL_OPTIONS, MATERIAL_SWATCH } from './lib/bakeCatalog'
-import type { PAP, WdfAsset } from './api'
+import { semanticBake } from './api'
+import type { PAP, WdfAsset, AiSemantics } from './api'
 
 // usual axis colour codes (X red · Y green · Z blue), palette-harmonised
 const AXIS = ['#E0694F', '#6FBF73', '#5C8BD6']
@@ -17,7 +18,7 @@ const MASK_PALETTE = ['#34C0AD', '#D9A84C', '#6E8BA0', '#E0694F', '#5FA38C', '#A
 const matSwatch = (m: string) => MATERIAL_SWATCH[m] ?? SWATCH[m] ?? SWATCH.default
 const matLabel = (m: string) => (MATERIAL_OPTIONS.find((o) => o.value === m)?.label ?? m)
 
-export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, capping, onEditPap, scale, onScale, busy, declared }: {
+export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, capping, onEditPap, scale, onScale, busy, declared, getImages, onAiResult }: {
   pap: PAP | null
   footer?: ReactNode
   onConfirm?: (materials: Record<string, string>) => void
@@ -30,17 +31,44 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
   onScale?: (s: number) => void
   busy?: boolean
   declared?: WdfAsset       // an asset declared by an opened .wdf (no bake yet)
+  /** Provide viewport renders for AI bake — return [] if unavailable */
+  getImages?: () => Promise<Blob[]>
+  /** Called with the raw AI result so the parent can merge it into the PAP */
+  onAiResult?: (result: AiSemantics) => void
 }) {
   // per-part material overrides (part id -> material). Keyed by the unique part id
   // (not idx, which can collide), reset on asset change AND after a confirm re-bake.
   const [over, setOver] = useState<Record<string, string>>({})
   // stable fill-bar maxima captured per asset (so live mass/volume edits don't move the goalposts)
   const baseRef = useRef({ mass: 200, vol: 100 })
+  // AI semantic bake state
+  const [aiState, setAiState] = useState<'idle' | 'running' | 'done' | 'error'>('idle')
+  const [aiResult, setAiResult] = useState<AiSemantics | null>(null)
+  const [aiError, setAiError] = useState<string | null>(null)
   const confirmedCount = pap?.parts?.filter((p) => p.confirmed).length ?? 0
   useEffect(() => {
     setOver({})
+    setAiResult(null)
+    setAiError(null)
+    setAiState('idle')
     if (pap) baseRef.current = { mass: Math.max(200, pap.physical.mass_kg * 2), vol: Math.max(100, pap.geometry.volume_m3 * 1000 * 2) }
   }, [pap?.asset_id, confirmedCount])
+
+  const runAiBake = async () => {
+    if (!pap || aiState === 'running') return
+    setAiState('running')
+    setAiError(null)
+    try {
+      const images = getImages ? await getImages() : []
+      const result = await semanticBake(pap.asset_id, images)
+      setAiResult(result)
+      setAiState('done')
+      onAiResult?.(result)
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : 'AI bake failed')
+      setAiState('error')
+    }
+  }
 
   if (!pap && declared) {
     const masks = Object.entries(declared.material)
@@ -130,7 +158,17 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
           <div className="prop"><span className="k"><Icon name="solid" />hollow</span><span className="v muted">{pap.physical.hollow ? 'yes' : 'no'}</span></div>
         </div>
         <div className="psec">
-          <div className="label" style={{ marginBottom: 4 }}>Semantics</div>
+          <div className="label" style={{ marginBottom: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span>Semantics</span>
+            <button
+              className={`ai-bake-btn${aiState === 'running' ? ' running' : aiState === 'done' ? ' done' : ''}`}
+              onClick={runAiBake}
+              disabled={aiState === 'running' || busy}
+              title="Send viewport renders to Gemini to infer class, materials and affordances"
+            >
+              {aiState === 'running' ? '⏳ Analyzing…' : aiState === 'done' ? '✓ Re-analyze' : '✦ Analyze with AI'}
+            </button>
+          </div>
           {pap.semantics.conf != null && (() => {
             const pct = Math.round(pap.semantics.conf * 100)
             const grade = pct >= 80 ? 'hi' : pct >= 50 ? 'mid' : 'lo'
@@ -149,6 +187,44 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
           {(pap.semantics.affordances?.length ?? 0) > 0 && (
             <div className="aff-chips">
               {(pap.semantics.affordances ?? []).map((a: string) => <span className="aff-chip" key={a}>{a}</span>)}
+            </div>
+          )}
+          {aiError && (
+            <div className="ai-error">{aiError}</div>
+          )}
+          {aiResult && (
+            <div className="ai-result">
+              {aiResult.class && (
+                <div className="prop"><span className="k">AI class</span><span className="v">{aiResult.class}</span></div>
+              )}
+              {(aiResult.materials?.length ?? 0) > 0 && (
+                <div className="mats" style={{ marginTop: 6 }}>
+                  {aiResult.materials!.map((m) => (
+                    <div className="mat" key={m.region}>
+                      <span className="ml"><span className="swatch" style={{ background: matSwatch(m.material) }} />{m.region}</span>
+                      <span className="mr">{matLabel(m.material)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {(aiResult.affordances?.length ?? 0) > 0 && (
+                <div className="aff-chips" style={{ marginTop: 6 }}>
+                  {aiResult.affordances!.map((a) => <span className="aff-chip ai" key={a}>{a}</span>)}
+                </div>
+              )}
+              {aiResult.confidence != null && (() => {
+                const pct = Math.round(aiResult.confidence! * 100)
+                const grade = pct >= 80 ? 'hi' : pct >= 50 ? 'mid' : 'lo'
+                return (
+                  <div className="prop conf-prop" style={{ marginTop: 4 }}>
+                    <span className="k">AI confidence</span>
+                    <span className="conf-meter">
+                      <span className="conf-bar"><span className={`conf-fill ${grade}`} style={{ width: `${pct}%` }} /></span>
+                      <span className={`conf-pct mono ${grade}`}>{pct}%</span>
+                    </span>
+                  </div>
+                )
+              })()}
             </div>
           )}
         </div>

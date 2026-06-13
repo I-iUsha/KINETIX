@@ -339,6 +339,26 @@ export default function App() {
       : x))
   }, [sel])
 
+  const onAiResult = useCallback((result: any) => {
+  setAssets((a) =>
+    a.map((x) =>
+      x.id === sel && x.pap
+        ? {
+            ...x,
+            pap: {
+              ...x.pap,
+              semantics: {
+                ...x.pap.semantics,
+                cls: result.class ?? x.pap.semantics.cls,
+                conf: result.confidence ?? x.pap.semantics.conf,
+              },
+            },
+          }
+        : x
+    )
+  )
+}, [sel])
+
   // Closure: two ways to seal an open mesh — one-click AUTO hole-fill, or the MANUAL
   // plane tool. Both re-bake and report a result card with before→after mass/volume.
   const [capping, setCapping] = useState(false)
@@ -499,7 +519,7 @@ export default function App() {
             <div className="col-resize" onPointerDown={startColResize('r')} role="separator" aria-orientation="vertical" title="Drag to resize" />
             <Properties pap={selected?.pap ?? null}
               onConfirm={onConfirmMaterials} onCapOpenings={onStartCap} onAutoFill={onAutoFill} capping={capping}
-              onEditPap={onEditPap} busy={busy} declared={selected?.wdf}
+              onEditPap={onEditPap} onAiResult={onAiResult} busy={busy} declared={selected?.wdf}
               footer={selected?.pap ? <PlacementTool assetId={selected.pap.asset_id} obb={selected.pap.geometry.obb} /> : undefined}
               {...(canPlace ? { scale, onScale: setScale } : {})} />
           </>
