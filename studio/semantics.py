@@ -17,7 +17,7 @@ from __future__ import annotations
 import json
 import os
 
-MODEL = "gemini-3.5-flash"
+MODEL = "gemini-2.5-flash"
 
 _PROMPT = (
     "You are kinetiX's semantic asset bake. These are renders of ONE 3D asset. Infer its "

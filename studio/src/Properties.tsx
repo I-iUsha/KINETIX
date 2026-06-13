@@ -51,7 +51,7 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
     setAiResult(null)
     setAiError(null)
     setAiState('idle')
-    if (pap) baseRef.current = { mass: Math.max(200, pap.physical.mass_kg * 2), vol: Math.max(100, pap.geometry.volume_m3 * 1000 * 2) }
+    if (pap) baseRef.current = { mass: Math.max(pap.physical.mass_kg * 3, 10), vol: Math.max(pap.geometry.volume_m3 * 1000 * 3, 0.1) }
   }, [pap?.asset_id, confirmedCount])
 
   const runAiBake = async () => {
@@ -277,8 +277,9 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
           </div>
           <div className="prop">
             <span className="k">volume</span>
-            <DragField value={pap.geometry.volume_m3 * 1000} onChange={(v) => onEditPap?.({ geometry: { volume_m3: v / 1000 } })}
-              min={0} max={baseRef.current.vol} step={0.5} decimals={1} unit="L" />
+            <DragField value={pap.geometry.volume_m3 * 1000}
+                onChange={(v) => onEditPap?.({ geometry: { volume_m3: v / 1000 } })}
+            min={0} step={0.001} decimals={3} unit="L" />
           </div>
           {onScale && (
             <>

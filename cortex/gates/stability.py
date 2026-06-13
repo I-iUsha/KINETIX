@@ -114,7 +114,10 @@ def _bbox_rectangle(pap) -> np.ndarray:
     Prefers the AABB (axis-aligned to the canonical frame); falls back to the OBB
     half-extents, then to a tiny unit patch so the polygon is never degenerate.
     """
-    half = pap.geometry.aabb or pap.geometry.obb or [0.5, 0.5, 0.5]
+    half = pap.geometry.aabb or pap.geometry.obb
+    if not half:
+    # degenerate PAP — use a tiny patch so stability doesn't silently pass
+        half = [0.05, 0.05, 0.05]
     hx, hy = float(half[0]), float(half[1])
     if hx <= 0:
         hx = 0.5

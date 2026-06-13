@@ -339,6 +339,7 @@ export default function App() {
       : x))
   }, [sel])
 
+  
   const onAiResult = useCallback((result: any) => {
   setAssets((a) =>
     a.map((x) =>
@@ -351,13 +352,38 @@ export default function App() {
                 ...x.pap.semantics,
                 cls: result.class ?? x.pap.semantics.cls,
                 conf: result.confidence ?? x.pap.semantics.conf,
+                up: result.up ?? x.pap.semantics.up,
+                front: result.front ?? x.pap.semantics.front,
+                affordances: result.affordances ?? x.pap.semantics.affordances,
+                // Note: materials need confirming before driving physics
+                // so we don't overwrite semantics.materials here directly
               },
             },
           }
         : x
     )
   )
-}, [sel])
+  }, [sel])
+
+//   const onAiResult = useCallback((result: any) => {
+//   setAssets((a) =>
+//     a.map((x) =>
+//       x.id === sel && x.pap
+//         ? {
+//             ...x,
+//             pap: {
+//               ...x.pap,
+//               semantics: {
+//                 ...x.pap.semantics,
+//                 cls: result.class ?? x.pap.semantics.cls,
+//                 conf: result.confidence ?? x.pap.semantics.conf,
+//               },
+//             },
+//           }
+//         : x
+//     )
+//   )
+// }, [sel])
 
   // Closure: two ways to seal an open mesh — one-click AUTO hole-fill, or the MANUAL
   // plane tool. Both re-bake and report a result card with before→after mass/volume.

@@ -42,6 +42,83 @@ def _normalize_authored(part_materials: dict | None) -> dict:
     return out
 
 
+# def _bake(
+#     asset_id: str,
+#     mesh_path: str,
+#     part_materials: dict | None,
+#     profile: str,
+#     cap: bool = False,
+#     cap_plane: dict | None = None,
+# ) -> tuple[PAP, list[dict]]:
+#     """Shared bake: geometry + physical + per-part material masks.
+
+#     With authored ``part_materials`` those materials drive physics and lock the
+#     affected fields (a human/agent signed off). With none, the bake stays a pure
+#     auto-bake — every part is ``"default"`` for *physics* (mass is honest, not
+#     guessed) while a low-confidence material *guess* per part seeds the confirm
+#     loop via ``semantics.materials``. Returns the PAP plus per-part mask detail.
+#     """
+#     # Multi-material model (gltf/glb/obj with several materials) → the masks are the
+#     # material groups (trunk/branch/leaves), baked composition-aware. This also skips
+#     # CoACD where it would time out. Single-material meshes fall through to CoACD.
+#     if not part_materials:
+#         grouped = bake_material_groups(mesh_path, cap=cap, cap_plane=cap_plane)
+#         if grouped is not None:
+#             geometry, physical, masks = grouped
+#             materials = [MaterialPart(part=m["id"], mat=m["material"], conf=m["conf"]) for m in masks]
+#             pap = PAP(
+#                 asset_id=asset_id,
+#                 profile=profile,
+#                 geometry=geometry,
+#                 semantics=Semantics(materials=materials),
+#                 physical=physical,
+#                 provenance=Provenance(auto=True, edited_fields=[], locked=[]),
+#             )
+#             return pap, masks
+#         # Single-material mesh + a manual cap plane: close the lone mesh at the plane
+#         # first, then run the usual geometry/convex bake on the now-capped mesh.
+#         if cap_plane:
+#             from cortex.bake.cap import cap_file
+
+#             capped_path = cap_file(mesh_path, cap_plane)
+#             if capped_path:
+#                 mesh_path = capped_path
+
+#     geometry, parts, flag = bake_geometry_parts(mesh_path)
+#     physical = bake_physical(parts, authored)
+# # Then patch conf:
+#     physical = physical.model_copy(update={"conf": 0.5 if flag == "coacd" else 0.2})
+
+#     authored = _normalize_authored(part_materials)
+#     guesses = guess_materials(parts) if not authored else []
+
+#     # Physics uses authored materials only; guesses never alter mass until confirmed.
+#     physical = bake_physical(parts, authored)
+
+#     if authored:
+#         materials = [
+#             MaterialPart(part=f"part_{i:02d}", mat=mat, conf=1.0)
+#             for i, mat in sorted(authored.items())
+#         ]
+#         shown = {i: (mat, 1.0, "default", True) for i, mat in authored.items()}
+#         locked = ["physical.mass_kg", "physical.com", "physical.inertia", "semantics.materials"]
+#         auto = False
+#     else:
+#         materials = [MaterialPart(part=g.part, mat=g.mat, conf=g.conf) for g in guesses]
+#         shown = {i: (g.mat, g.conf, g.source, g.confirmed) for i, g in enumerate(guesses)}
+#         locked = []
+#         auto = True
+
+#     pap = PAP(
+#         asset_id=asset_id,
+#         profile=profile,
+#         geometry=geometry,
+#         semantics=Semantics(materials=materials),
+#         physical=physical,
+#         provenance=Provenance(auto=auto, edited_fields=[], locked=locked),
+#     )
+#     detail = describe_parts(parts, authored, shown)
+#     return pap, detail
 def _bake(
     asset_id: str,
     mesh_path: str,
@@ -50,17 +127,13 @@ def _bake(
     cap: bool = False,
     cap_plane: dict | None = None,
 ) -> tuple[PAP, list[dict]]:
-    """Shared bake: geometry + physical + per-part material masks.
+    """Shared bake: geometry + physical + per-part material masks."""
 
-    With authored ``part_materials`` those materials drive physics and lock the
-    affected fields (a human/agent signed off). With none, the bake stays a pure
-    auto-bake — every part is ``"default"`` for *physics* (mass is honest, not
-    guessed) while a low-confidence material *guess* per part seeds the confirm
-    loop via ``semantics.materials``. Returns the PAP plus per-part mask detail.
-    """
+    # ── must be first: everything below references authored ──────────────────
+    authored = _normalize_authored(part_materials)
+
     # Multi-material model (gltf/glb/obj with several materials) → the masks are the
-    # material groups (trunk/branch/leaves), baked composition-aware. This also skips
-    # CoACD where it would time out. Single-material meshes fall through to CoACD.
+    # material groups (trunk/branch/leaves), baked composition-aware.
     if not part_materials:
         grouped = bake_material_groups(mesh_path, cap=cap, cap_plane=cap_plane)
         if grouped is not None:
@@ -79,18 +152,16 @@ def _bake(
         # first, then run the usual geometry/convex bake on the now-capped mesh.
         if cap_plane:
             from cortex.bake.cap import cap_file
-
             capped_path = cap_file(mesh_path, cap_plane)
             if capped_path:
                 mesh_path = capped_path
 
-    geometry, parts, _flag = bake_geometry_parts(mesh_path)
+    geometry, parts, flag = bake_geometry_parts(mesh_path)
 
-    authored = _normalize_authored(part_materials)
+    # authored is defined at the top — safe to use here
     guesses = guess_materials(parts) if not authored else []
-
-    # Physics uses authored materials only; guesses never alter mass until confirmed.
     physical = bake_physical(parts, authored)
+    physical = physical.model_copy(update={"conf": 0.5 if flag == "coacd" else 0.2})
 
     if authored:
         materials = [
