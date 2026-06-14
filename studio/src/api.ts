@@ -1,0 +1,239 @@
+// Typed client for the kinetiX Studio backend. Types mirror the frozen contracts.py.
+const BASE = (import.meta as any).env?.VITE_API ?? 'http://localhost:8000'
+
+export type MaterialPart = { part: string; mat: string; conf: number }
+// A baked per-part mask (augmented /bake field, outside the frozen contract).
+export type Part = {
+  id: string; idx: number
+  material: string; conf: number; source: string; confirmed: boolean
+  volume_m3: number; vol_frac: number; mass_kg: number; mass_frac: number
+  hollow: boolean; centroid: number[]; extent: number[]; color: string
+  shell?: boolean                          // inherent thin surface (foliage/cloth/one-sided) — area-based, not closeable
+  verts?: number[][]; tris?: number[][]   // convex-part geometry for the masks view
+}
+export type PAP = {
+  asset_id: string
+  profile: string
+  geometry: { obb: number[]; volume_m3: number; convex_parts: number; watertight: boolean }
+  semantics: { cls: string; up: number[]; front: number[]; materials: MaterialPart[]; affordances?: string[]; conf: number }
+  physical: { mass_kg: number; com: number[]; inertia: number[][]; hollow: boolean; conf: number }
+  structural: { support_footprint: number[][]; max_load_kg_est: number | null; experimental: boolean }
+  provenance?: { auto: boolean; edited_fields: string[]; locked: string[] }
+  rest_states: string[]
+  parts?: Part[]
+}
+export type Health = {
+  ok: boolean; cortex: boolean
+  ue?: { available: boolean; cmd: boolean; project: boolean }
+  gemini?: { available: boolean; sdk: boolean; key: boolean }
+}
+
+// AI semantic bake (Gemini): what the asset IS — class, up/front, region materials, affordances.
+export type AiSemantics = {
+  class?: string; up?: number[]; front?: number[]
+  materials?: { region: string; material: string }[]
+  affordances?: string[]; confidence?: number; raw?: string
+}
+export async function semanticBake(assetId: string, images: Blob[], hint = ''): Promise<AiSemantics> {
+  const fd = new FormData()
+  fd.append('asset_id', assetId)
+  fd.append('hint', hint)
+  images.forEach((b, i) => fd.append('images', b, `render_${i}.png`))
+  const r = await fetch(`${BASE}/semantics`, { method: 'POST', body: fd })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'semantics failed')
+  return r.json()
+}
+
+export async function health(): Promise<Health> {
+  const r = await fetch(`${BASE}/health`)
+  return r.json()
+}
+
+// --- placement distributions (learn placement on tagged surfaces by example) ---
+export type PlacementExample = { tag: string; orientation: string; normal_offset: number; tilt_deg: number; yaw_deg: number; lateral: number[]; noise?: { amp: number; freq: number; seed: number } | null }
+export type PlacementDist = { tag: string; n: number; orientation: string; mean: { normal_offset: number; tilt_deg: number; yaw_deg: number; lateral: number[] }; spread: { normal_offset: number; tilt_deg: number; yaw_deg: number; lateral: number[] } }
+export async function getPlacements(assetId: string): Promise<{ examples: PlacementExample[]; tags: Record<string, number> }> {
+  const r = await fetch(`${BASE}/placement/${encodeURIComponent(assetId)}`)
+  if (!r.ok) return { examples: [], tags: {} }
+  return r.json()
+}
+export async function addPlacement(assetId: string, ex: Omit<PlacementExample, 'yaw_deg'> & { yaw_deg?: number }): Promise<{ tags: Record<string, number> }> {
+  const r = await fetch(`${BASE}/placement/${encodeURIComponent(assetId)}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ yaw_deg: 0, ...ex }),
+  })
+  if (!r.ok) throw new Error('capture failed')
+  return r.json()
+}
+export async function clearPlacements(assetId: string, tag?: string): Promise<void> {
+  await fetch(`${BASE}/placement/${encodeURIComponent(assetId)}${tag ? `?tag=${encodeURIComponent(tag)}` : ''}`, { method: 'DELETE' })
+}
+
+// A manual cap plane (origin/normal in the mesh's native frame, half = lid half-extent,
+// depth = slab tolerance) sent by the viewport's cap tool to close a specific opening.
+export type CapPlane = { origin: number[]; normal: number[]; half: number; depth: number }
+
+// The outcome of a cap (auto hole-fill or manual plane), surfaced to the user: did it
+// seal / refine / miss / find a shell mesh, with mass & volume before and after.
+export type CapResult = {
+  status: 'sealed' | 'refined' | 'shell' | 'none' | 'error'
+  mode: 'auto' | 'manual'
+  before: { mass: number; vol: number }   // vol in m³
+  after: { mass: number; vol: number }
+  watertight: boolean
+  sealed?: number                          // # solid regions now closed
+  total?: number                           // # solid (closeable) regions
+  shellMesh?: boolean                      // every region is an area-based shell
+  message?: string
+}
+
+// Classify a cap outcome from the before/after PAPs (the per-mask `shell`/`hollow` flags
+// tell us whether anything is even closeable). Pure — the UI renders it as a result card.
+export function classifyCap(before: PAP | undefined, after: PAP, mode: 'auto' | 'manual'): CapResult {
+  const parts = after.parts ?? []
+  const solids = parts.filter((p) => !p.shell)
+  const sealed = solids.filter((p) => !p.hollow).length
+  const shellMesh = parts.length > 0 && solids.length === 0
+  const bMass = before?.physical.mass_kg ?? 0, bVol = before?.geometry.volume_m3 ?? 0
+  const aMass = after.physical.mass_kg, aVol = after.geometry.volume_m3
+  const changed = Math.abs(aMass - bMass) > Math.max(1e-4, bMass * 1e-4)
+    || Math.abs(aVol - bVol) > Math.max(1e-9, bVol * 1e-4)
+  const status: CapResult['status'] =
+    after.geometry.watertight && !before?.geometry.watertight ? 'sealed'
+      : shellMesh ? 'shell'
+        : changed ? 'refined' : 'none'
+  return { status, mode, before: { mass: bMass, vol: bVol }, after: { mass: aMass, vol: aVol },
+    watertight: after.geometry.watertight, sealed, total: solids.length, shellMesh }
+}
+export type BakeOpts = { materials?: Record<string, string>; profile?: string; decimate?: number; cap?: boolean; capPlane?: CapPlane; extras?: File[] }
+
+export async function bake(file: File, opts: BakeOpts = {}): Promise<PAP> {
+  const fd = new FormData()
+  fd.append('mesh', file)
+  if (opts.materials) fd.append('materials', JSON.stringify(opts.materials))
+  if (opts.profile) fd.append('profile', opts.profile)
+  if (opts.decimate) fd.append('decimate', String(opts.decimate))
+  if (opts.cap) fd.append('cap', 'true')
+  if (opts.capPlane) fd.append('cap_plane', JSON.stringify(opts.capPlane))
+  for (const e of opts.extras ?? []) fd.append('extras', e)
+  const r = await fetch(`${BASE}/bake`, { method: 'POST', body: fd })
+  if (!r.ok) {
+    const detail = await r.json().catch(() => ({}))
+    throw new Error(detail.detail ?? 'bake failed')
+  }
+  return r.json()
+}
+
+// Batch-convert .uasset files in ONE Unreal boot, then bake each by token.
+export type ConvertResult = { name: string; token: string | null; ok: boolean }
+export async function convertUassets(files: File[]): Promise<ConvertResult[]> {
+  const fd = new FormData()
+  for (const f of files) fd.append('files', f)
+  const r = await fetch(`${BASE}/convert`, { method: 'POST', body: fd })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'convert failed')
+  return (await r.json()).results
+}
+
+// --- projects (save/open the .wdf semantics + the actual model files together) ---
+export type ProjectAsset = { id: string; name: string; main: string; files: string[]; profile?: string; masks?: Part[]; pap?: PAP }
+export type ProjectInfo = { name: string; assets: number; saved: number }
+export async function saveProject(name: string, assets: ProjectAsset[], files: { key: string; file: File }[]): Promise<{ name: string }> {
+  const fd = new FormData()
+  fd.append('name', name)
+  fd.append('manifest', JSON.stringify(assets))
+  for (const { key, file } of files) fd.append('files', file, key)
+  const r = await fetch(`${BASE}/project/save`, { method: 'POST', body: fd })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'save failed')
+  return r.json()
+}
+export async function listProjects(): Promise<ProjectInfo[]> {
+  const r = await fetch(`${BASE}/project/list`)
+  return (await r.json()).projects ?? []
+}
+export async function openProjectData(name: string): Promise<{ manifest: { assets: ProjectAsset[] }; wdf: string }> {
+  const r = await fetch(`${BASE}/project/open?name=${encodeURIComponent(name)}`)
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'open failed')
+  return r.json()
+}
+export async function fetchProjectFile(name: string, assetId: string, file: string): Promise<File> {
+  const r = await fetch(`${BASE}/project/file?name=${encodeURIComponent(name)}&asset_id=${encodeURIComponent(assetId)}&file=${encodeURIComponent(file)}`)
+  if (!r.ok) throw new Error('file fetch failed')
+  return new File([await r.blob()], file)
+}
+
+export async function bakeCached(token: string, opts: BakeOpts = {}): Promise<PAP> {
+  const r = await fetch(`${BASE}/bake_cached`, {
+    method: 'POST', headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ token, materials: opts.materials, profile: opts.profile, decimate: opts.decimate }),
+  })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'bake failed')
+  return r.json()
+}
+
+// --- validate / repair / commit (the live gate loop) ---
+export type GateName = 'collision' | 'stability' | 'constraints' | 'reach'
+export type GateResult = {
+  gate: GateName
+  ok: boolean | null
+  skipped: boolean
+  value_m: number | null
+  fix: { translate: number[]; rotate_quat: number[] | null } | null
+  viz: string | null
+  detail: string | null
+}
+export type Verdict = { ok: boolean; stopped_at: GateName | null; gates: GateResult[]; soft_cost: number }
+export type Tf = { pos: number[]; quat: number[]; scale: number[] }
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const r = await fetch(`${BASE}${path}`, {
+    method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
+  })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? `${path} failed`)
+  return r.json()
+}
+
+const DEFAULT_QUAT = [0, 0, 0, 1]
+// --- .wdf scene (open a world document) ---
+export type WdfJoint = { axis: string; range_min: number; range_max: number }
+export type WdfAsset = {
+  name: string; profile: string | null; material: Record<string, string>
+  states: string[]; affordances: string[]; tags: string[]
+  joint: WdfJoint | null; swept_volume: string | null; load_cap: string | null
+}
+export type WdfLaw = { name: string; expr: string; hard: boolean }
+export type WdfPlacement = { asset: string; target: string; preposition: string; state: string | null }
+export type WdfField = { key: string; value: string }
+export type WdfScene = { name: string; fields: WdfField[]; placements: WdfPlacement[]; laws: WdfLaw[] }
+export type WdfDoc = { vocabulary: { assets: WdfAsset[] }; scene: WdfScene | null }
+
+export async function openWdf(file: File): Promise<WdfDoc> {
+  const fd = new FormData()
+  fd.append('doc', file)
+  const r = await fetch(`${BASE}/open_wdf`, { method: 'POST', body: fd })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'open .wdf failed')
+  return r.json()
+}
+
+const DEFAULT_SCALE = [1, 1, 1]
+// `freeStanding` (default) runs the free-standing stability model so an object
+// resting on the floor isn't toppled by lateral placement — only by tilt/slope.
+export const validate = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE, freeStanding = true) =>
+  post<Verdict>('/validate', { object, pos, quat, scale, free_standing: freeStanding })
+export const repair = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
+  post<Tf>('/repair', { object, pos, quat, scale })
+export async function downloadRepaired(file: File, tf: Tf, extras: File[] = []): Promise<Blob> {
+  const fd = new FormData()
+  fd.append('mesh', file)
+  fd.append('transform', JSON.stringify(tf))
+  for (const extra of extras) fd.append('extras', extra)
+  const r = await fetch(`${BASE}/export_repaired`, { method: 'POST', body: fd })
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'repaired GLB export failed')
+  return r.blob()
+}
+export const commit = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
+  post<{ ok: boolean }>('/commit', { object, pos, quat, scale })
+
+// --- door swept-volume (WP-6 articulation) ---
+export type Swept = { vertices: number[][]; faces: number[][]; range_deg: number }
+export const swept = (object: string, range_deg: number) =>
+  post<Swept>('/swept', { object, range_deg })

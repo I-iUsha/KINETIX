@@ -1,0 +1,134 @@
+/* Node editor (Fara's editable constraint graph) — restyled to the kinetiX graphite-
+   glass theme. Consumes theme.css tokens; recessed cards, teal accent, no glow. */
+
+/* the bottom block is a row: palette | graph | node-inspector */
+.nodeeditor .ne { display: flex; min-height: 0; }
+
+/* ── palette (left) ───────────────────────────────────────────── */
+.palette {
+  width: 168px; flex: none; overflow-y: auto;
+  border-right: 1px solid var(--line); background: linear-gradient(180deg,#121517,#0E1012); padding: 10px;
+}
+.palette-head { font-size: 9.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink3); font-weight: 600; margin-bottom: 10px; }
+.palette-cat { margin-bottom: 12px; }
+.palette-item {
+  display: flex; align-items: center; height: 32px; padding: 0 10px; margin-bottom: 4px;
+  border: 1px solid var(--field-b); border-left: 2px solid var(--line2); border-radius: 4px;
+  background: var(--inset); cursor: grab; user-select: none;
+}
+.palette-item:hover { background: var(--surface2); }
+.palette-item:active { cursor: grabbing; }
+.palette-item-label { font-size: 12.5px; color: var(--ink2); font-weight: 500; }
+.palette-item:hover .palette-item-label { color: var(--ink); }
+/* a quiet kind accent on the left edge (cool variants) */
+.palette-item.kind-asset { border-left-color: #34C0AD; }
+.palette-item.kind-measure { border-left-color: #6E8BA0; }
+.palette-item.kind-law { border-left-color: #A088B0; }
+.palette-item.kind-field { border-left-color: var(--ink3); }
+.palette-item.kind-verdict { border-left-color: #D9A84C; }
+
+/* ── canvas (center) ──────────────────────────────────────────── */
+.graph-main { flex: 1; display: flex; min-width: 0; }
+.canvas { flex: 1; position: relative; min-width: 0; }
+/* faded watermark on the graph canvas (UE-style) */
+.canvas::after {
+  content: 'kinetiX'; position: absolute; right: 16px; bottom: 10px; z-index: 0; pointer-events: none;
+  font-family: var(--serif); font-size: 34px; letter-spacing: .05em; color: rgba(231,234,236,.03);
+}
+/* transient hint when a wire is rejected by the typed ports */
+.ne-toast {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 5;
+  max-width: 460px; pointer-events: none;
+  background: linear-gradient(180deg,#23282C,#191D20); border: 1px solid var(--line2);
+  border-left: 2px solid var(--terracotta, #E0694F); border-radius: 6px;
+  padding: 8px 12px; color: var(--ink2); font-size: 11.5px; line-height: 1.45;
+  box-shadow: 0 6px 20px rgba(0,0,0,.4); animation: ne-toast-in .14s ease-out;
+}
+@keyframes ne-toast-in { from { opacity: 0; transform: translate(-50%, 6px); } to { opacity: 1; transform: translate(-50%, 0); } }
+.react-flow { background: transparent; }
+.react-flow__edge-path { stroke: var(--line2); stroke-width: 1.4; }
+.react-flow__edge.selected .react-flow__edge-path,
+.react-flow__edge:hover .react-flow__edge-path { stroke: var(--sage); }
+/* box-select rectangle: subtle teal wash, calm dashed edge */
+.react-flow__selection,
+.react-flow__nodesselection-rect { background: rgba(52, 192, 173, 0.05); border: 1px dashed rgba(52, 192, 173, 0.45); border-radius: 4px; }
+/* selected node: a crisp teal ring that hugs the card (no halo gap, no glow) */
+.react-flow__node.selected { box-shadow: 0 0 0 1.5px var(--sage); border-radius: 7px; }
+.react-flow__handle { width: 8px; height: 8px; border: 1px solid var(--bg); background: var(--ink3); }
+.react-flow__handle:hover { background: var(--sage); }
+.react-flow__controls { box-shadow: none; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+.react-flow__controls-button { background: var(--surface); border-bottom: 1px solid var(--line); width: 22px; height: 22px; }
+.react-flow__controls-button:hover { background: var(--surface2); }
+.react-flow__controls-button svg { fill: var(--ink3); }
+
+/* ── nodes ────────────────────────────────────────────────────── */
+.node {
+  background: linear-gradient(180deg,#1C2125,#14181B); border: 1px solid var(--line2); border-radius: 6px;
+  padding: 8px 11px; min-width: 132px; color: var(--ink); font-size: 12px;
+  box-shadow: inset 0 1px 0 var(--glass-hi), 0 6px 16px rgba(0,0,0,.4);
+}
+.node-title { font-weight: 600; font-size: 12.5px; color: var(--ink); }
+.node-sub { color: var(--ink3); font-size: 10.5px; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.node-measure-val { font-variant-numeric: tabular-nums; font-size: 13px; color: var(--ink); margin-top: 5px; }
+.node-gate-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.node-headline { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; margin-top: 4px; }
+.soft-tag { font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink4); font-weight: 600; }
+.pill { font-variant-numeric: tabular-nums; font-size: 9px; font-weight: 700; letter-spacing: .06em; color: #0E1012; padding: 2px 7px; border-radius: 3px; }
+/* quiet kind accents (cool variants) */
+.node-asset { border-left: 2px solid #34C0AD; }
+.node-measure { border-left: 2px solid #6E8BA0; }
+.node-field { border-left: 2px solid var(--ink3); }
+/* .node-law / .node-verdict take their border color inline from STATUS_COLOR */
+
+/* ── node inspector (right) ───────────────────────────────────── */
+.inspector {
+  width: 216px; flex: none; overflow-y: auto;
+  border-left: 1px solid var(--line); background: linear-gradient(180deg,#121517,#0E1012); padding: 12px 14px;
+}
+.inspector-empty { color: var(--ink4); font-size: 12px; padding-top: 8px; }
+.inspector-kind { font-size: 9px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink4); }
+.inspector-title { font-size: 14px; color: var(--ink); font-weight: 600; margin-top: 3px; }
+.inspector-sub { font-size: 11px; color: var(--ink3); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.inspector-section { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 10px; }
+.inspector-h { font-size: 9px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink4); margin-bottom: 7px; }
+.inspector-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--ink2); padding: 3px 0; }
+.inspector-key { color: var(--ink3); }
+.inspector-detail { font-size: 11px; color: var(--ink3); font-variant-numeric: tabular-nums; margin-top: 4px; }
+.inspector-foot { font-variant-numeric: tabular-nums; font-size: 10px; color: var(--ink4); margin-top: 14px; }
+.port-chip { font-variant-numeric: tabular-nums; font-size: 10px; padding: 1px 6px; border-radius: 3px; margin-left: 4px; }
+.inspector-select {
+  width: 100%; height: 28px; padding: 0 8px;
+  background: var(--field); color: var(--ink); font-family: var(--sans); font-size: 12px;
+  border: 1px solid var(--field-b); border-radius: 4px; cursor: pointer;
+}
+.inspector-select:hover { border-color: var(--line2); }
+.inspector-select:focus { outline: none; border-color: var(--sage); }
+.inspector .knob { width: 100%; accent-color: var(--sage); margin: 4px 0; }
+.knob-val { font-variant-numeric: tabular-nums; font-size: 12px; color: var(--ink2); }
+/* inline (right-aligned in a row) variant of the inspector select */
+.inspector-select-inline { width: auto; max-width: 160px; height: 24px; font-size: 11.5px; }
+/* editable law tolerance: ⟨cmp⟩ ⟨number⟩ ⟨unit⟩ */
+.tol-edit { display: inline-flex; align-items: center; gap: 4px; }
+.tol-cmp { color: var(--ink3); font-variant-numeric: tabular-nums; }
+.tol-unit { color: var(--ink3); font-size: 11px; }
+.tol-input {
+  width: 56px; height: 24px; padding: 0 6px; text-align: right;
+  background: var(--field); color: var(--ink); font-family: var(--sans);
+  font-size: 12px; font-variant-numeric: tabular-nums;
+  border: 1px solid var(--field-b); border-radius: 4px;
+}
+.tol-input:hover { border-color: var(--line2); }
+.tol-input:focus { outline: none; border-color: var(--sage); }
+.inspector-delete {
+  width: 100%; height: 30px; border: 1px solid var(--line2); border-radius: 4px;
+  background: var(--surface); color: var(--ink3); font-family: var(--sans); font-size: 12px; cursor: pointer;
+}
+.inspector-delete:hover { border-color: var(--fail); color: var(--fail); }
+
+/* ── resize handle (node editor) ──────────────────────────────── */
+.resize-handle {
+  height: 4px; flex: none; background: transparent; border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line); cursor: row-resize; user-select: none;
+  transition: background-color 120ms cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+.resize-handle:hover { background-color: rgba(52, 192, 173, 0.12); }
