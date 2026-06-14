@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 """
+=======
+﻿"""
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 HuggingFace mask provider â€” the ML source, via HF Inference Providers.
 
 HF retired the old ``api-inference.huggingface.co`` serverless host for the
@@ -23,13 +27,18 @@ from ..registry import MaskProvider, register
 
 SEGMENT_MODEL = os.environ.get("KINETIX_HF_SEGMENT_MODEL", "nvidia/segformer-b0-finetuned-ade-512-512")
 _ROUTER = "https://router.huggingface.co/hf-inference/models"
+<<<<<<< HEAD
 _ROOT = Path(__file__).resolve().parents[3]
+=======
+_KEY_FILE = Path(__file__).resolve().parents[3] / ".hf_token"
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 
 def _hf_token() -> str | None:
     env = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACEHUB_API_TOKEN")
     if env:
         return env
+<<<<<<< HEAD
     for name in (".hf_token", ".hf_key"):
         try:
             tok = (_ROOT / name).read_text(encoding="utf-8").strip()
@@ -38,6 +47,12 @@ def _hf_token() -> str | None:
         except OSError:
             pass
     return None
+=======
+    try:
+        return _KEY_FILE.read_text(encoding="utf-8").strip() or None
+    except OSError:
+        return None
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 
 def available() -> bool:

@@ -351,7 +351,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 .gseg-opt:hover:not(.on){color:var(--ink2)}
 .gseg-opt.on{color:var(--sage);background:linear-gradient(180deg,#223029,#19231f);box-shadow:inset 0 0 0 1px var(--sage-deep)}
 .gact-btns{display:flex;gap:6px}
+<<<<<<< HEAD
 .gact-error{max-width:360px;color:var(--fail);font-size:10.5px;line-height:1.25}
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 .tbtn{flex:1;height:28px;padding:0 10px;border-radius:4px;border:1px solid var(--line2);
   background:linear-gradient(180deg,#23282D,#181C1F);color:var(--ink2);font-family:var(--sans);
   font-size:11.5px;font-weight:600;cursor:pointer;box-shadow:inset 0 1px 0 var(--glass-hi)}
@@ -684,6 +687,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 @keyframes mbar{0%{left:0;width:12%}50%{width:68%}100%{left:88%;width:12%}}
 .mrail-add{display:flex;align-items:center;gap:7px;padding:7px 8px;color:var(--ink3);font-size:11px;background:var(--surface2);border-top:1px solid var(--line);margin-top:auto;cursor:pointer}
 .mrail-add:hover{color:var(--ink2)}
+<<<<<<< HEAD
 .mask-question{position:absolute;z-index:14;right:18px;top:52px;width:360px;max-width:calc(100% - 36px);
   border-radius:8px;background:linear-gradient(180deg,#1b2024,#15191c);border:1px solid var(--line2);
   box-shadow:0 20px 48px rgba(0,0,0,.58),inset 0 1px 0 var(--glass-hi);overflow:hidden}
@@ -698,6 +702,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:13p
 .mask-question-choices button:hover:not(:disabled){color:var(--ink);border-color:var(--sage-deep)}
 .mask-question-choices button.primary{color:var(--sage);border-color:var(--sage-deep)}
 .mask-question-choices button:disabled{opacity:.4;cursor:default}
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 /* semantics affordance chips (Properties) */
 .aff-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
 .aff-chip{font-size:10.5px;padding:2px 8px;border-radius:10px;background:rgba(52,192,173,.1);

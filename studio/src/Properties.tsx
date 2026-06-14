@@ -18,7 +18,11 @@ const MASK_PALETTE = ['#34C0AD', '#D9A84C', '#6E8BA0', '#E0694F', '#5FA38C', '#A
 const matSwatch = (m: string) => MATERIAL_SWATCH[m] ?? SWATCH[m] ?? SWATCH.default
 const matLabel = (m: string) => (MATERIAL_OPTIONS.find((o) => o.value === m)?.label ?? m)
 
+<<<<<<< HEAD
 export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, capping, onEditPap, scale, onScale, busy, declared, getImages, onAiResult, geminiAvailable }: {
+=======
+export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, capping, onEditPap, scale, onScale, busy, declared, getImages, onAiResult }: {
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   pap: PAP | null
   footer?: ReactNode
   onConfirm?: (materials: Record<string, string>) => void
@@ -35,7 +39,10 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
   getImages?: () => Promise<Blob[]>
   /** Called with the raw AI result so the parent can merge it into the PAP */
   onAiResult?: (result: AiSemantics) => void
+<<<<<<< HEAD
   geminiAvailable?: boolean
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 }) {
   // per-part material overrides (part id -> material). Keyed by the unique part id
   // (not idx, which can collide), reset on asset change AND after a confirm re-bake.
@@ -164,10 +171,15 @@ export function Properties({ pap, footer, onConfirm, onCapOpenings, onAutoFill, 
             <button
               className={`ai-bake-btn${aiState === 'running' ? ' running' : aiState === 'done' ? ' done' : ''}`}
               onClick={runAiBake}
+<<<<<<< HEAD
               disabled={aiState === 'running' || busy || geminiAvailable === false}
               title={geminiAvailable === false
                 ? 'Gemini unavailable: set GEMINI_API_KEY or GOOGLE_API_KEY and restart the backend'
                 : 'Send viewport renders to Gemini to infer class, materials and affordances'}
+=======
+              disabled={aiState === 'running' || busy}
+              title="Send viewport renders to Gemini to infer class, materials and affordances"
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
             >
               {aiState === 'running' ? '⏳ Analyzing…' : aiState === 'done' ? '✓ Re-analyze' : '✦ Analyze with AI'}
             </button>

@@ -17,7 +17,11 @@ from __future__ import annotations
 import json
 import os
 
+<<<<<<< HEAD
 MODEL = os.environ.get("GEMINI_MODEL", "gemini-flash-latest").strip() or "gemini-flash-latest"
+=======
+MODEL = "gemini-2.5-flash"
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 _PROMPT = (
     "You are kinetiX's semantic asset bake. These are renders of ONE 3D asset. Infer its "
@@ -37,9 +41,15 @@ _KEY_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".gemini_ke
 
 
 def _key() -> str | None:
+<<<<<<< HEAD
     env = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if env:
         return env.strip() or None
+=======
+    env = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+    if env:
+        return env
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     try:
         with open(_KEY_FILE, encoding="utf-8") as f:
             return f.read().strip() or None
@@ -61,6 +71,7 @@ def semantic_bake(images: list[bytes], hint: str = "") -> dict:
 
     Raises ``RuntimeError`` if unconfigured, or the SDK error on a call failure.
     """
+<<<<<<< HEAD
     key = _key()
     if not key:
         raise RuntimeError("Gemini not configured (set GEMINI_API_KEY or GOOGLE_API_KEY)")
@@ -79,6 +90,19 @@ def semantic_bake(images: list[bytes], hint: str = "") -> dict:
     )
 
     return _validate_semantics(_parse_json(resp.text))
+=======
+    if not _key():
+        raise RuntimeError("Gemini not configured (set GEMINI_API_KEY)")
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=_key())
+    contents: list = [types.Part.from_bytes(data=img, mime_type="image/png") for img in images]
+    contents.append(_PROMPT + (f"\nHint about the asset: {hint}" if hint else ""))
+    resp = client.models.generate_content(model=MODEL, contents=contents)
+
+    return _parse_json(resp.text)
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 
 def _parse_json(text: str | None) -> dict:
@@ -89,6 +113,7 @@ def _parse_json(text: str | None) -> dict:
             return json.loads(text[start:end + 1])
         except json.JSONDecodeError:
             pass
+<<<<<<< HEAD
     raise RuntimeError("Gemini returned an empty or invalid JSON response")
 
 
@@ -135,6 +160,9 @@ def _validate_semantics(data: dict) -> dict:
         "affordances": affordances,
         "confidence": _score(data.get("confidence")),
     }
+=======
+    return {"raw": text}
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 
 _MASKS_PROMPT = (
@@ -166,6 +194,7 @@ def semantic_masks(images: list[bytes], hint: str = "") -> dict:
     Returns ``{"affordances":[...], "fragility":[...], "confidence":float}``. Raises
     ``RuntimeError`` if unconfigured. Shares the client/key logic with ``semantic_bake``.
     """
+<<<<<<< HEAD
     key = _key()
     if not key:
         raise RuntimeError("Gemini not configured (set GEMINI_API_KEY or GOOGLE_API_KEY)")
@@ -206,3 +235,15 @@ def semantic_masks(images: list[bytes], hint: str = "") -> dict:
             if isinstance(row, dict) and row.get("band") in {"top", "middle", "bottom"}
         ]
     return data
+=======
+    if not _key():
+        raise RuntimeError("Gemini not configured (set GEMINI_API_KEY)")
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=_key())
+    contents: list = [types.Part.from_bytes(data=img, mime_type="image/png") for img in images]
+    contents.append(_MASKS_PROMPT + (f"\nHint about the asset: {hint}" if hint else ""))
+    resp = client.models.generate_content(model=MODEL, contents=contents)
+    return _parse_json(resp.text)
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6

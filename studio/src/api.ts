@@ -221,6 +221,7 @@ export const validate = (object: string, pos: number[], quat = DEFAULT_QUAT, sca
   post<Verdict>('/validate', { object, pos, quat, scale, free_standing: freeStanding })
 export const repair = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
   post<Tf>('/repair', { object, pos, quat, scale })
+<<<<<<< HEAD
 export async function downloadRepaired(file: File, tf: Tf, extras: File[] = []): Promise<Blob> {
   const fd = new FormData()
   fd.append('mesh', file)
@@ -230,6 +231,8 @@ export async function downloadRepaired(file: File, tf: Tf, extras: File[] = []):
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'repaired GLB export failed')
   return r.blob()
 }
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 export const commit = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
   post<{ ok: boolean }>('/commit', { object, pos, quat, scale })
 

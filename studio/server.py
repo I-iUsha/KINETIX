@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 """kinetiX Studio backend â€” a thin FastAPI bridge that exposes the real ``cortex``
+=======
+﻿"""kinetiX Studio backend â€” a thin FastAPI bridge that exposes the real ``cortex``
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 to the browser over request/response HTTP (Option A, per the design spec).
 
 The studio UI never runs physics; it POSTs to these endpoints and renders the
@@ -102,6 +106,7 @@ def _hf_status() -> dict:
 
     tok = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACEHUB_API_TOKEN")
     if not tok:
+<<<<<<< HEAD
         for name in (".hf_token", ".hf_key"):
             f = Path(__file__).resolve().parents[1] / name
             try:
@@ -110,6 +115,13 @@ def _hf_status() -> dict:
                     break
             except OSError:
                 tok = ""
+=======
+        f = Path(__file__).resolve().parents[1] / ".hf_token"
+        try:
+            tok = f.read_text(encoding="utf-8").strip()
+        except OSError:
+            tok = ""
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     return {"available": bool(tok), "key": bool(tok)}
 
 
@@ -140,7 +152,11 @@ def health() -> dict:
 async def semantics(
     asset_id: str = Form(""),
     hint: str = Form(""),
+<<<<<<< HEAD
     images: list[UploadFile] = File(default=[]),
+=======
+    images: list[UploadFile] = File(...),
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 ) -> dict:
     """AI semantic bake: send viewport renders to Gemini â†’ class / up / front /
     per-region materials / affordances. Folds the inferred class into the stored PAP."""
@@ -151,6 +167,7 @@ async def semantics(
             status_code=503,
             detail="Gemini not configured â€” set GEMINI_API_KEY (free key at https://aistudio.google.com).",
         )
+<<<<<<< HEAD
     if not images:
         raise HTTPException(status_code=422, detail="no render images provided")
     imgs = []
@@ -165,6 +182,11 @@ async def semantics(
         if not data.startswith(b"\x89PNG\r\n\x1a\n"):
             raise HTTPException(status_code=415, detail="render image is not a valid PNG")
         imgs.append(data)
+=======
+    imgs = [await im.read() for im in images][:4]
+    if not imgs:
+        raise HTTPException(status_code=422, detail="no render images provided")
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     try:
         sem = semantic_bake(imgs, hint)
     except Exception as e:
@@ -450,6 +472,7 @@ def repair(p: Placement) -> dict:
     return new_tf.model_dump()
 
 
+<<<<<<< HEAD
 @app.post("/export_repaired")
 async def export_repaired(
     mesh: UploadFile = File(...),
@@ -495,6 +518,8 @@ async def export_repaired(
     return Response(content=payload, media_type="model/gltf-binary", headers=headers)
 
 
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 @app.post("/commit")
 def commit(p: Placement) -> dict:
     """Commit the placement into the session world (UE5 dispatch is a later WP)."""

@@ -24,8 +24,12 @@ const cm = (m: number | null) => (m === null ? 'idle' : `${m >= 0 ? '+' : '−'}
 // The gate-stack toolbar: live 3D gate icons on the left, then a UE4-style transform
 // block (Location / Rotation) and the validate → repair → commit action cluster on
 // the right. Rotation feeds the quaternion, so it affects the stability gate.
+<<<<<<< HEAD
 export function GateStack({ verdict, pos, setPos, rot, setRot, busy, onValidate, onRepair, onCommit,
   onDownloadRepaired, canDownloadRepaired, error, freeStanding, setFreeStanding }: {
+=======
+export function GateStack({ verdict, pos, setPos, rot, setRot, busy, onValidate, onRepair, onCommit, freeStanding, setFreeStanding }: {
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   verdict: VerdictLike
   pos?: number[]
   setPos?: (p: number[]) => void
@@ -35,9 +39,12 @@ export function GateStack({ verdict, pos, setPos, rot, setRot, busy, onValidate,
   onValidate?: () => void
   onRepair?: () => void
   onCommit?: () => void
+<<<<<<< HEAD
   onDownloadRepaired?: () => void
   canDownloadRepaired?: boolean
   error?: string | null
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   freeStanding?: boolean
   setFreeStanding?: (b: boolean) => void
 }) {
@@ -120,10 +127,15 @@ export function GateStack({ verdict, pos, setPos, rot, setRot, busy, onValidate,
             <div className="gact-btns">
               <button className="tbtn primary" disabled={busy} onClick={onValidate}>Validate</button>
               <button className="tbtn warn" disabled={busy || !failed} onClick={onRepair}>Repair</button>
+<<<<<<< HEAD
               <button className="tbtn" disabled={busy || !canDownloadRepaired} onClick={onDownloadRepaired}>Download GLB</button>
               <button className="tbtn go" disabled={busy || !ready} onClick={onCommit}>Commit</button>
             </div>
             {error && <div className="gact-error" role="alert">{error}</div>}
+=======
+              <button className="tbtn go" disabled={busy || !ready} onClick={onCommit}>Commit</button>
+            </div>
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
           </div>
         </div>
       )}

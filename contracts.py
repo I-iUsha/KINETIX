@@ -187,6 +187,7 @@ MCP_TOOLS: dict[str, str] = {
     "add_mask":            "(asset_id, name, archetype, data, category) -> Mask",
     "compute_mask":        "(asset_id, provider_key) -> Mask",
     "remove_mask":         "(asset_id, mask_id) -> bool",
+<<<<<<< HEAD
     # Unreal/canonical bridge + scene-building workflow.
     "ue5_to_canonical":     "(pos, quat | None) -> Transform",
     "canonical_to_ue5":     "(pos, quat | None) -> Transform",
@@ -203,4 +204,6 @@ MCP_TOOLS: dict[str, str] = {
     "place_on_surface":     "(asset_id, surface_tag) -> dict",
     "placement_tags":       "(asset_id) -> dict",
     "export_placement_wdf": "(out_path, asset_ids_json, scene_name) -> dict",
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 }

@@ -492,7 +492,11 @@ function buildForceField(group: THREE.Group, content: THREE.Object3D, box: THREE
 /** Dark device stage: renders the real textured model (materials/textures intact),
  *  with an extensible mask rail (surface masks recolour, overlays stack). Plus the verdict
  *  viz (CoM, plumb, support footprint). Canonical is Z-up; world tilted so Z reads up. */
+<<<<<<< HEAD
 export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale = 1, verdict, status, swept, onDropFiles, capping, onApplyCap, onExitCap, busy, capResult, onCapAgain, onDismissCap, onCaptureReady }: {
+=======
+export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale = 1, verdict, status, swept, onDropFiles, capping, onApplyCap, onExitCap, busy, capResult, onCapAgain, onDismissCap }: {
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   name: string; file?: File | null; extras?: File[]
   pap: PAP | null; pos: number[]; rot?: number[]; scale?: number; verdict: Verdict | null
   status?: 'queued' | 'converting' | 'baking' | 'ok' | 'error' | 'declared'
@@ -505,7 +509,10 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   capResult?: CapResult | null            // outcome of the last cap (success card)
   onCapAgain?: () => void                 // reopen the cap tool to seal another opening
   onDismissCap?: () => void               // dismiss the result card
+<<<<<<< HEAD
   onCaptureReady?: (capture: (() => Promise<Blob[]>) | null) => void
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const refs = useRef<Refs | null>(null)
@@ -517,10 +524,13 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   const [overlays, setOverlays] = useState<Set<string>>(() => new Set())
   const [computing, setComputing] = useState<Set<string>>(() => new Set())
   const [maskErrors, setMaskErrors] = useState<Record<string, string>>({})
+<<<<<<< HEAD
   const [maskQuestion, setMaskQuestion] = useState<{
     key: string; name: string; required: boolean; wantsHint: boolean
   } | null>(null)
   const [maskHint, setMaskHint] = useState('')
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   const assetId = pap?.asset_id ?? null
   const [hasContent, setHasContent] = useState(false)
   const [dropping, setDropping] = useState(false)
@@ -727,7 +737,10 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   // ---- on asset change: reset mask state + load any stored masks ----
   useEffect(() => {
     setSurface('textured'); setOverlays(new Set()); setMaskErrors({}); setMasks([])
+<<<<<<< HEAD
     setMaskQuestion(null); setMaskHint('')
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setRp([]); setRSel(-1)   // clear measure points so they don't leak across assets
     setCap({ sizeFrac: 0.5, mode: 'translate' })   // reset the cap tool to defaults
     if (!assetId) return
@@ -976,6 +989,7 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
       c.toBlob((b) => res(b), 'image/png')
     })
 
+<<<<<<< HEAD
   useEffect(() => {
     if (!onCaptureReady) return
     const capture = async () => {
@@ -986,6 +1000,8 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     return () => onCaptureReady(null)
   }, [onCaptureReady])
 
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   // compute a provider's mask on demand (auto-compute on click), storing the result.
   const runCompute = async (key: string) => {
     if (!assetId) return
@@ -1020,6 +1036,7 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     }
   }
 
+<<<<<<< HEAD
   const runComputeDirect = async (key: string, params: Record<string, string> = {}) => {
     if (!assetId) return
     const prov = catalog.find((p) => p.key === key)
@@ -1052,11 +1069,19 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
 
   const onSurface = (key: string) => {
     if (key !== 'textured' && !masks.some((m) => m.id === key) && !computing.has(key)) requestCompute(key)
+=======
+  const onSurface = (key: string) => {
+    if (key !== 'textured' && !masks.some((m) => m.id === key) && !computing.has(key)) void runCompute(key)
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setSurface(key)
   }
   const onOverlay = (key: string) => {
     if (overlays.has(key)) { setOverlays((s) => { const n = new Set(s); n.delete(key); return n }); return }
+<<<<<<< HEAD
     if (!masks.some((m) => m.id === key) && !computing.has(key)) requestCompute(key)
+=======
+    if (!masks.some((m) => m.id === key) && !computing.has(key)) void runCompute(key)
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setOverlays((s) => new Set(s).add(key))
   }
 
@@ -1217,6 +1242,7 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
         {capResult && !capping && hasContent && (
           <CapResultCard result={capResult} onAgain={() => onCapAgain?.()} onDone={() => onDismissCap?.()} />
         )}
+<<<<<<< HEAD
 
         {maskQuestion && (
           <div className="mask-question" role="dialog" aria-modal="true" aria-labelledby="mask-question-title"
@@ -1267,6 +1293,8 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
             )}
           </div>
         )}
+=======
+>>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
       </div>
       {hasContent && (
         <MaskRail catalog={catalog} masks={masks} surface={surface} overlays={overlays}
