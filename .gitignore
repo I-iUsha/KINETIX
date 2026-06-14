@@ -1,8 +1,5 @@
 # Python
-<<<<<<< HEAD
 .pytest-*
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 __pycache__/
 *.py[cod]
 .venv/
