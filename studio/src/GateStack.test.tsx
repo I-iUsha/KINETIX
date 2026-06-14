@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { fireEvent, render, screen } from '@testing-library/react'
-=======
-import { render, screen } from '@testing-library/react'
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 import { GateStack } from './GateStack'
 import type { Verdict } from './api'
 
@@ -30,15 +26,12 @@ test('all gates idle when there is no verdict', () => {
   expect(container.querySelectorAll('.gate.idle').length).toBe(4)
   expect(container.querySelector('.gate.fail')).toBeNull()
 })
-<<<<<<< HEAD
 
 test('enables repaired GLB download only after a successful repair', () => {
   const onDownload = vi.fn()
   render(<GateStack verdict={{ ...TOPPLE, ok: true, stopped_at: null }}
-    pos={[0, 0, 0]} setPos={() => {}} rot={[0, 0, 0]} setRot={() => {}}
-    onValidate={() => {}} onDownloadRepaired={onDownload} canDownloadRepaired />)
+    pos={[0, 0, 0]} setPos={() => { }} rot={[0, 0, 0]} setRot={() => { }}
+    onValidate={() => { }} onDownloadRepaired={onDownload} canDownloadRepaired />)
   fireEvent.click(screen.getByRole('button', { name: 'Download GLB' }))
   expect(onDownload).toHaveBeenCalledOnce()
 })
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6

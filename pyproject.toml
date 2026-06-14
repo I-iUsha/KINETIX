@@ -20,13 +20,10 @@ dependencies = [
     "rerun-sdk>=0.18",    # the 3D conscience (viewport, timeline, ViewCoordinates)
     "httpx>=0.27",        # UE5 Remote Control HTTP client
     "lark>=1.1",          # .wdf grammar / parser (full round-trip)
-<<<<<<< HEAD
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "python-multipart>=0.0.9",
     "google-genai>=1.0",
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 ]
 
 [project.optional-dependencies]

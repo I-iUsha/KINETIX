@@ -348,8 +348,8 @@ function initCapGizmo(g: THREE.Group, box: THREE.Box3) {
 
 // Scale the lid quad / border / normal-arrow to the current half-extent.
 function setLidSize(g: THREE.Group, half: number) {
-  ;(g.getObjectByName('lid') as THREE.Mesh | undefined)?.scale.set(half * 2, half * 2, 1)
-  ;(g.getObjectByName('border') as THREE.LineSegments | undefined)?.scale.set(half * 2, half * 2, 1)
+  ; (g.getObjectByName('lid') as THREE.Mesh | undefined)?.scale.set(half * 2, half * 2, 1)
+    ; (g.getObjectByName('border') as THREE.LineSegments | undefined)?.scale.set(half * 2, half * 2, 1)
   const arrow = g.getObjectByName('arrow') as THREE.ArrowHelper | undefined
   if (arrow) { const len = half * 0.9; arrow.setLength(len, len * 0.32, len * 0.2) }
 }
@@ -492,11 +492,7 @@ function buildForceField(group: THREE.Group, content: THREE.Object3D, box: THREE
 /** Dark device stage: renders the real textured model (materials/textures intact),
  *  with an extensible mask rail (surface masks recolour, overlays stack). Plus the verdict
  *  viz (CoM, plumb, support footprint). Canonical is Z-up; world tilted so Z reads up. */
-<<<<<<< HEAD
 export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale = 1, verdict, status, swept, onDropFiles, capping, onApplyCap, onExitCap, busy, capResult, onCapAgain, onDismissCap, onCaptureReady }: {
-=======
-export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale = 1, verdict, status, swept, onDropFiles, capping, onApplyCap, onExitCap, busy, capResult, onCapAgain, onDismissCap }: {
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   name: string; file?: File | null; extras?: File[]
   pap: PAP | null; pos: number[]; rot?: number[]; scale?: number; verdict: Verdict | null
   status?: 'queued' | 'converting' | 'baking' | 'ok' | 'error' | 'declared'
@@ -509,10 +505,7 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   capResult?: CapResult | null            // outcome of the last cap (success card)
   onCapAgain?: () => void                 // reopen the cap tool to seal another opening
   onDismissCap?: () => void               // dismiss the result card
-<<<<<<< HEAD
   onCaptureReady?: (capture: (() => Promise<Blob[]>) | null) => void
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 }) {
   const hostRef = useRef<HTMLDivElement>(null)
   const refs = useRef<Refs | null>(null)
@@ -524,13 +517,10 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   const [overlays, setOverlays] = useState<Set<string>>(() => new Set())
   const [computing, setComputing] = useState<Set<string>>(() => new Set())
   const [maskErrors, setMaskErrors] = useState<Record<string, string>>({})
-<<<<<<< HEAD
   const [maskQuestion, setMaskQuestion] = useState<{
     key: string; name: string; required: boolean; wantsHint: boolean
   } | null>(null)
   const [maskHint, setMaskHint] = useState('')
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   const assetId = pap?.asset_id ?? null
   const [hasContent, setHasContent] = useState(false)
   const [dropping, setDropping] = useState(false)
@@ -554,12 +544,12 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
 
   const emptyMsg = hasContent ? null
     : status === 'baking' ? 'decomposing…'
-    : status === 'converting' ? 'converting via Unreal…'
-    : status === 'queued' ? 'queued…'
-    : status === 'error' ? 'bake failed'
-    : status === 'declared' ? 'declared asset · no baked geometry'
-    : (file || pap) ? 'loading…'
-    : 'no asset selected'
+      : status === 'converting' ? 'converting via Unreal…'
+        : status === 'queued' ? 'queued…'
+          : status === 'error' ? 'bake failed'
+            : status === 'declared' ? 'declared asset · no baked geometry'
+              : (file || pap) ? 'loading…'
+                : 'no asset selected'
 
   // ---- one-time scene setup ----
   useEffect(() => {
@@ -732,20 +722,17 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
   }, [file, extrasKey, pap?.asset_id])
 
   // ---- fetch the provider catalog once ----
-  useEffect(() => { maskProviders().then(setCatalog).catch(() => {}) }, [])
+  useEffect(() => { maskProviders().then(setCatalog).catch(() => { }) }, [])
 
   // ---- on asset change: reset mask state + load any stored masks ----
   useEffect(() => {
     setSurface('textured'); setOverlays(new Set()); setMaskErrors({}); setMasks([])
-<<<<<<< HEAD
     setMaskQuestion(null); setMaskHint('')
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setRp([]); setRSel(-1)   // clear measure points so they don't leak across assets
     setCap({ sizeFrac: 0.5, mode: 'translate' })   // reset the cap tool to defaults
     if (!assetId) return
     let cancelled = false
-    listMasks(assetId).then((ms) => { if (!cancelled) setMasks(ms) }).catch(() => {})
+    listMasks(assetId).then((ms) => { if (!cancelled) setMasks(ms) }).catch(() => { })
     return () => { cancelled = true }
   }, [assetId])
 
@@ -782,13 +769,13 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     ].map((c) => c.applyEuler(e)))
     r.comDot.position.set(wx, wy, wz); r.comDot.visible = true
     r.plumb.geometry.setFromPoints([new THREE.Vector3(wx, wy, wz), new THREE.Vector3(wx, wy, 0)])
-    ;(r.plumb as THREE.Line).computeLineDistances(); r.plumb.visible = true
+      ; (r.plumb as THREE.Line).computeLineDistances(); r.plumb.visible = true
     r.landing.position.set(wx, wy, 0.001); r.landing.visible = true
     const stab = verdict?.gates.find((g) => g.gate === 'stability')
     const col = stab ? (stab.ok === false ? FAIL : stab.ok === true ? SAGE : IDLE) : IDLE
-    ;(r.footprint.material as THREE.LineBasicMaterial).color.setHex(col)
-    ;(r.plumb.material as THREE.LineDashedMaterial).color.setHex(col)
-    ;(r.landing.material as THREE.MeshBasicMaterial).color.setHex(col)
+      ; (r.footprint.material as THREE.LineBasicMaterial).color.setHex(col)
+      ; (r.plumb.material as THREE.LineDashedMaterial).color.setHex(col)
+      ; (r.landing.material as THREE.MeshBasicMaterial).color.setHex(col)
   }, [pos, rot, scale, verdict, pap])
 
   // ---- view options: gizmo / grid / human reference toggles ----
@@ -880,7 +867,7 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     rp.forEach((c, i) => {
       const m = rMarkers.current[i]; if (!m) return
       m.position.copy(toThree(c))
-      ;(m.material as THREE.MeshBasicMaterial).color.setHex(i === rSel ? 0xffffff : SAGE)
+        ; (m.material as THREE.MeshBasicMaterial).color.setHex(i === rSel ? 0xffffff : SAGE)
       m.scale.setScalar(i === rSel ? 1.4 : 1)
     })
     // line between the two points
@@ -989,7 +976,6 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
       c.toBlob((b) => res(b), 'image/png')
     })
 
-<<<<<<< HEAD
   useEffect(() => {
     if (!onCaptureReady) return
     const capture = async () => {
@@ -999,9 +985,6 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     onCaptureReady(capture)
     return () => onCaptureReady(null)
   }, [onCaptureReady])
-
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   // compute a provider's mask on demand (auto-compute on click), storing the result.
   const runCompute = async (key: string) => {
     if (!assetId) return
@@ -1036,7 +1019,6 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
     }
   }
 
-<<<<<<< HEAD
   const runComputeDirect = async (key: string, params: Record<string, string> = {}) => {
     if (!assetId) return
     const prov = catalog.find((p) => p.key === key)
@@ -1069,19 +1051,11 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
 
   const onSurface = (key: string) => {
     if (key !== 'textured' && !masks.some((m) => m.id === key) && !computing.has(key)) requestCompute(key)
-=======
-  const onSurface = (key: string) => {
-    if (key !== 'textured' && !masks.some((m) => m.id === key) && !computing.has(key)) void runCompute(key)
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setSurface(key)
   }
   const onOverlay = (key: string) => {
     if (overlays.has(key)) { setOverlays((s) => { const n = new Set(s); n.delete(key); return n }); return }
-<<<<<<< HEAD
     if (!masks.some((m) => m.id === key) && !computing.has(key)) requestCompute(key)
-=======
-    if (!masks.some((m) => m.id === key) && !computing.has(key)) void runCompute(key)
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     setOverlays((s) => new Set(s).add(key))
   }
 
@@ -1109,199 +1083,196 @@ export function Viewport({ name, file, extras, pap, pos, rot = [0, 0, 0], scale 
         <div className="t"><Icon name="aperture" /><span>Viewport{name ? ` · ${name}` : ''}</span></div>
       </header>
       <div className="vp-body">
-      <div
-        className={`stage${dropping ? ' dropping' : ''}`}
-        onDragOver={onDropFiles ? (e) => {
-          // only react to genuine file drags — not the browser's native
-          // selection/element drag that an orbit click-drag can kick off
-          if (!Array.from(e.dataTransfer.types).includes('Files')) return
-          e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; if (!dropping) setDropping(true)
-        } : undefined}
-        onDragLeave={onDropFiles ? (e) => { if (e.currentTarget === e.target) setDropping(false) } : undefined}
-        onDrop={onDropFiles ? (e) => {
-          e.preventDefault(); setDropping(false)
-          const files = Array.from(e.dataTransfer.files)
-          if (files.length) onDropFiles(files)
-        } : undefined}
-      >
-        <div className="cambar">
-          <button className="cb-recenter" data-tip="Recenter" onClick={() => refs.current?.setCam('recenter')}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <circle cx="12" cy="12" r="5.5" /><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" />
-            </svg>
-          </button>
-          <span className="cb-sep" />
-          {CAM_VIEWS.map(({ v, tip, face }) => (
-            <button key={v} className={camView === v ? 'on' : ''} data-tip={tip}
-              onClick={() => { setCamView(v); refs.current?.setCam(v) }}>
-              <CubeIcon face={face} />
-            </button>
-          ))}
-          <span className="cb-sep" />
-          <button className={rulerOn ? 'on' : ''} data-tip="Measure" onClick={() => setRulerOn((v) => !v)}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="2.5" y="8" width="19" height="8" rx="1" transform="rotate(-12 12 12)" />
-              <path d="M7 8.5v2.4M11 7.7v3M15 6.9v2.4M19 6.1v3" transform="rotate(-12 12 12)" />
-            </svg>
-          </button>
-          <div className="cb-vmenu">
-            <button className={viewMenu ? 'on' : ''} data-tip="View options" onClick={() => setViewMenu((v) => !v)}>
+        <div
+          className={`stage${dropping ? ' dropping' : ''}`}
+          onDragOver={onDropFiles ? (e) => {
+            // only react to genuine file drags — not the browser's native
+            // selection/element drag that an orbit click-drag can kick off
+            if (!Array.from(e.dataTransfer.types).includes('Files')) return
+            e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; if (!dropping) setDropping(true)
+          } : undefined}
+          onDragLeave={onDropFiles ? (e) => { if (e.currentTarget === e.target) setDropping(false) } : undefined}
+          onDrop={onDropFiles ? (e) => {
+            e.preventDefault(); setDropping(false)
+            const files = Array.from(e.dataTransfer.files)
+            if (files.length) onDropFiles(files)
+          } : undefined}
+        >
+          <div className="cambar">
+            <button className="cb-recenter" data-tip="Recenter" onClick={() => refs.current?.setCam('recenter')}>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" /><circle cx="12" cy="12" r="2.6" />
+                <circle cx="12" cy="12" r="5.5" /><path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" />
               </svg>
             </button>
-            {viewMenu && (
-              <div className="cb-pop" onPointerDown={(e) => e.stopPropagation()}>
-                <label><input type="checkbox" checked={showGiz} onChange={(e) => setShowGiz(e.target.checked)} />Orientation gizmo</label>
-                <label><input type="checkbox" checked={showGrid} onChange={(e) => setShowGrid(e.target.checked)} />Ground grid</label>
-                <label><input type="checkbox" checked={showHuman} onChange={(e) => setShowHuman(e.target.checked)} />Human reference (1.8 m)</label>
-              </div>
-            )}
+            <span className="cb-sep" />
+            {CAM_VIEWS.map(({ v, tip, face }) => (
+              <button key={v} className={camView === v ? 'on' : ''} data-tip={tip}
+                onClick={() => { setCamView(v); refs.current?.setCam(v) }}>
+                <CubeIcon face={face} />
+              </button>
+            ))}
+            <span className="cb-sep" />
+            <button className={rulerOn ? 'on' : ''} data-tip="Measure" onClick={() => setRulerOn((v) => !v)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                <rect x="2.5" y="8" width="19" height="8" rx="1" transform="rotate(-12 12 12)" />
+                <path d="M7 8.5v2.4M11 7.7v3M15 6.9v2.4M19 6.1v3" transform="rotate(-12 12 12)" />
+              </svg>
+            </button>
+            <div className="cb-vmenu">
+              <button className={viewMenu ? 'on' : ''} data-tip="View options" onClick={() => setViewMenu((v) => !v)}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6z" /><circle cx="12" cy="12" r="2.6" />
+                </svg>
+              </button>
+              {viewMenu && (
+                <div className="cb-pop" onPointerDown={(e) => e.stopPropagation()}>
+                  <label><input type="checkbox" checked={showGiz} onChange={(e) => setShowGiz(e.target.checked)} />Orientation gizmo</label>
+                  <label><input type="checkbox" checked={showGrid} onChange={(e) => setShowGrid(e.target.checked)} />Ground grid</label>
+                  <label><input type="checkbox" checked={showHuman} onChange={(e) => setShowHuman(e.target.checked)} />Human reference (1.8 m)</label>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-        {rulerOn && (() => {
-          const d = rp.length === 2
-            ? Math.hypot(rp[0][0] - rp[1][0], rp[0][1] - rp[1][1], rp[0][2] - rp[1][2]) : 0
-          const fmt = (m: number) => (m >= 1 ? `${m.toFixed(3)} m` : `${(m * 100).toFixed(1)} cm`)
-          return (
-            <div className="ruler-panel" onPointerDown={(e) => e.stopPropagation()}>
-              <div className="cap-head">
-                <span className="cap-title">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
-                    <rect x="2.5" y="8" width="19" height="8" rx="1" transform="rotate(-12 12 12)" />
-                    <path d="M7 8.5v2.4M11 7.7v3M15 6.9v2.4M19 6.1v3" transform="rotate(-12 12 12)" />
-                  </svg>Measure
-                </span>
-                <button className="cap-x" title="Done" onClick={() => setRulerOn(false)}>✕</button>
-              </div>
-              <div className="rl-body">
-                {[0, 1].map((i) => (
-                  <div className={`rl-pt${rSel === i ? ' on' : ''}`} key={i} onPointerDown={() => rp[i] && setRSel(i)}>
-                    <span className="rl-tag">P{i + 1}</span>
-                    {rp[i] ? (
-                      <span className="vec">
-                        {[0, 1, 2].map((ax) => (
-                          <DragField key={ax} value={rp[i][ax]} min={-50} max={50} step={0.01} decimals={3} showFill={false}
-                            prefix={<span style={{ color: AXIS[ax], fontWeight: 700 }}>{'XYZ'[ax]}</span>}
-                            onChange={(v) => setRp((prev) => prev.map((c, j) => (j === i ? c.map((cc, k) => (k === ax ? v : cc)) : c)))} />
-                        ))}
-                      </span>
-                    ) : <span className="rl-empty">click the view to place</span>}
+          {rulerOn && (() => {
+            const d = rp.length === 2
+              ? Math.hypot(rp[0][0] - rp[1][0], rp[0][1] - rp[1][1], rp[0][2] - rp[1][2]) : 0
+            const fmt = (m: number) => (m >= 1 ? `${m.toFixed(3)} m` : `${(m * 100).toFixed(1)} cm`)
+            return (
+              <div className="ruler-panel" onPointerDown={(e) => e.stopPropagation()}>
+                <div className="cap-head">
+                  <span className="cap-title">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+                      <rect x="2.5" y="8" width="19" height="8" rx="1" transform="rotate(-12 12 12)" />
+                      <path d="M7 8.5v2.4M11 7.7v3M15 6.9v2.4M19 6.1v3" transform="rotate(-12 12 12)" />
+                    </svg>Measure
+                  </span>
+                  <button className="cap-x" title="Done" onClick={() => setRulerOn(false)}>✕</button>
+                </div>
+                <div className="rl-body">
+                  {[0, 1].map((i) => (
+                    <div className={`rl-pt${rSel === i ? ' on' : ''}`} key={i} onPointerDown={() => rp[i] && setRSel(i)}>
+                      <span className="rl-tag">P{i + 1}</span>
+                      {rp[i] ? (
+                        <span className="vec">
+                          {[0, 1, 2].map((ax) => (
+                            <DragField key={ax} value={rp[i][ax]} min={-50} max={50} step={0.01} decimals={3} showFill={false}
+                              prefix={<span style={{ color: AXIS[ax], fontWeight: 700 }}>{'XYZ'[ax]}</span>}
+                              onChange={(v) => setRp((prev) => prev.map((c, j) => (j === i ? c.map((cc, k) => (k === ax ? v : cc)) : c)))} />
+                          ))}
+                        </span>
+                      ) : <span className="rl-empty">click the view to place</span>}
+                    </div>
+                  ))}
+                  <div className="rl-dist"><span className="rl-k">Distance</span><span className="rl-v mono">{rp.length === 2 ? fmt(d) : '—'}</span></div>
+                  <div className="rl-actions">
+                    <button className="cap-cancel" disabled={!rp.length} onClick={() => { setRp([]); setRSel(-1) }}>Clear</button>
+                    <button className="cap-go" onClick={() => setRulerOn(false)}>Done</button>
                   </div>
-                ))}
-                <div className="rl-dist"><span className="rl-k">Distance</span><span className="rl-v mono">{rp.length === 2 ? fmt(d) : '—'}</span></div>
-                <div className="rl-actions">
-                  <button className="cap-cancel" disabled={!rp.length} onClick={() => { setRp([]); setRSel(-1) }}>Clear</button>
-                  <button className="cap-go" onClick={() => setRulerOn(false)}>Done</button>
                 </div>
               </div>
+            )
+          })()}
+          <div ref={hostRef} style={{ position: 'absolute', inset: 0 }} />
+          {emptyMsg && <div className="emptyvp">{emptyMsg}</div>}
+          {dropping && <div className="dropover"><Icon name="import" /><span>Drop to bake</span></div>}
+          {overlays.has('gravity_field') && hasContent && pap && !capping && (
+            <div className="inertia-info">
+              <div className="ii-head"><Icon name="mass" /><span>Inertia</span></div>
+              <div className="ii-row"><span className="ii-k">Mass</span><span className="ii-v">{pap.physical.mass_kg.toFixed(1)} kg</span></div>
+              <div className="ii-row"><span className="ii-k">CoM height</span><span className="ii-v">{canonCom(pap.physical.com, name)[2].toFixed(3)} m</span></div>
+              <div className="ii-row"><span className="ii-k">Gyration</span><span className="ii-v">{gyration(pap)}</span></div>
+              <div className="ii-row"><span className="ii-k">Hollow</span><span className="ii-v">{pap.physical.hollow ? 'yes' : 'no'}</span></div>
             </div>
-          )
-        })()}
-        <div ref={hostRef} style={{ position: 'absolute', inset: 0 }} />
-        {emptyMsg && <div className="emptyvp">{emptyMsg}</div>}
-        {dropping && <div className="dropover"><Icon name="import" /><span>Drop to bake</span></div>}
-        {overlays.has('gravity_field') && hasContent && pap && !capping && (
-          <div className="inertia-info">
-            <div className="ii-head"><Icon name="mass" /><span>Inertia</span></div>
-            <div className="ii-row"><span className="ii-k">Mass</span><span className="ii-v">{pap.physical.mass_kg.toFixed(1)} kg</span></div>
-            <div className="ii-row"><span className="ii-k">CoM height</span><span className="ii-v">{canonCom(pap.physical.com, name)[2].toFixed(3)} m</span></div>
-            <div className="ii-row"><span className="ii-k">Gyration</span><span className="ii-v">{gyration(pap)}</span></div>
-            <div className="ii-row"><span className="ii-k">Hollow</span><span className="ii-v">{pap.physical.hollow ? 'yes' : 'no'}</span></div>
-          </div>
-        )}
+          )}
 
-        {capping && hasContent && (
-          <div className="cap-panel" onPointerDown={(e) => e.stopPropagation()}>
-            <div className="cap-head">
-              <span className="cap-title"><Icon name="seal" />Cap opening</span>
-              <button className="cap-x" title="Done" onClick={() => onExitCap?.()}>✕</button>
-            </div>
-            <p className="cap-hint">Drag the handles to move the plane over a hole. The bright outline shows where it cuts, then place it down.</p>
-            <div className="cap-field">
-              <label>Handles</label>
-              <div className="cap-axes">
-                <button className={cap.mode === 'translate' ? 'on' : ''}
-                  onClick={() => setCap((c) => ({ ...c, mode: 'translate' }))}>Move</button>
-                <button className={cap.mode === 'rotate' ? 'on' : ''}
-                  onClick={() => setCap((c) => ({ ...c, mode: 'rotate' }))}>Rotate</button>
+          {capping && hasContent && (
+            <div className="cap-panel" onPointerDown={(e) => e.stopPropagation()}>
+              <div className="cap-head">
+                <span className="cap-title"><Icon name="seal" />Cap opening</span>
+                <button className="cap-x" title="Done" onClick={() => onExitCap?.()}>✕</button>
+              </div>
+              <p className="cap-hint">Drag the handles to move the plane over a hole. The bright outline shows where it cuts, then place it down.</p>
+              <div className="cap-field">
+                <label>Handles</label>
+                <div className="cap-axes">
+                  <button className={cap.mode === 'translate' ? 'on' : ''}
+                    onClick={() => setCap((c) => ({ ...c, mode: 'translate' }))}>Move</button>
+                  <button className={cap.mode === 'rotate' ? 'on' : ''}
+                    onClick={() => setCap((c) => ({ ...c, mode: 'rotate' }))}>Rotate</button>
+                </div>
+              </div>
+              <div className="cap-field">
+                <label>Lid size <span className="cap-num">{Math.round(cap.sizeFrac * 100)}%</span></label>
+                <input type="range" min={0.05} max={1.2} step={0.01} value={cap.sizeFrac}
+                  onChange={(e) => setCap((c) => ({ ...c, sizeFrac: Number(e.target.value) }))} />
+              </div>
+              <div className="cap-actions">
+                <button className="cap-cancel" onClick={() => onExitCap?.()} disabled={busy}>Cancel</button>
+                <button className="cap-go" onClick={applyCap} disabled={busy}>{busy ? 'Capping…' : 'Place & cap'}</button>
               </div>
             </div>
-            <div className="cap-field">
-              <label>Lid size <span className="cap-num">{Math.round(cap.sizeFrac * 100)}%</span></label>
-              <input type="range" min={0.05} max={1.2} step={0.01} value={cap.sizeFrac}
-                onChange={(e) => setCap((c) => ({ ...c, sizeFrac: Number(e.target.value) }))} />
-            </div>
-            <div className="cap-actions">
-              <button className="cap-cancel" onClick={() => onExitCap?.()} disabled={busy}>Cancel</button>
-              <button className="cap-go" onClick={applyCap} disabled={busy}>{busy ? 'Capping…' : 'Place & cap'}</button>
-            </div>
-          </div>
-        )}
+          )}
 
-        {capResult && !capping && hasContent && (
-          <CapResultCard result={capResult} onAgain={() => onCapAgain?.()} onDone={() => onDismissCap?.()} />
-        )}
-<<<<<<< HEAD
+          {capResult && !capping && hasContent && (
+            <CapResultCard result={capResult} onAgain={() => onCapAgain?.()} onDone={() => onDismissCap?.()} />
+          )}
 
-        {maskQuestion && (
-          <div className="mask-question" role="dialog" aria-modal="true" aria-labelledby="mask-question-title"
-               onPointerDown={(e) => e.stopPropagation()}>
-            <div className="cap-head">
-              <span className="cap-title" id="mask-question-title">{maskQuestion.name}</span>
-              <button className="cap-x" aria-label="Cancel mask analysis"
-                onClick={() => { setMaskQuestion(null); setMaskHint('') }}>×</button>
+          {maskQuestion && (
+            <div className="mask-question" role="dialog" aria-modal="true" aria-labelledby="mask-question-title"
+              onPointerDown={(e) => e.stopPropagation()}>
+              <div className="cap-head">
+                <span className="cap-title" id="mask-question-title">{maskQuestion.name}</span>
+                <button className="cap-x" aria-label="Cancel mask analysis"
+                  onClick={() => { setMaskQuestion(null); setMaskHint('') }}>×</button>
+              </div>
+              <p className="mask-question-note">
+                This is a visual analysis layer. It changes viewport colours or overlays,
+                but does not alter the GLB geometry.
+              </p>
+              {!maskQuestion.required && !maskQuestion.wantsHint ? (
+                <>
+                  <div className="mask-question-label">Add a custom hint for Gemini?</div>
+                  <div className="mask-question-choices" role="group" aria-label="Use a custom Gemini hint">
+                    <button onClick={() => {
+                      const key = maskQuestion.key
+                      setMaskQuestion(null)
+                      void runComputeDirect(key)
+                    }}>No, analyze automatically</button>
+                    <button className="primary"
+                      onClick={() => setMaskQuestion((q) => q ? { ...q, wantsHint: true } : q)}>
+                      Yes, add a hint
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <label className="mask-question-label" htmlFor="mask-hint">
+                    {maskQuestion.required ? 'What should be segmented?' : 'Optional hint (maximum 15 words)'}
+                  </label>
+                  <input id="mask-hint" className="mask-question-input" autoFocus value={maskHint}
+                    placeholder={maskQuestion.required ? 'e.g. bottle cap or handle' : 'e.g. load-bearing base'}
+                    onChange={(e) => setMaskHint(e.target.value)} />
+                  <div className="mask-question-choices">
+                    <button onClick={() => { setMaskQuestion(null); setMaskHint('') }}>Cancel</button>
+                    <button className="primary" disabled={maskQuestion.required && !maskHint.trim()} onClick={() => {
+                      const key = maskQuestion.key
+                      const value = clampWords(maskHint.trim(), 15)
+                      const params = value ? { [maskQuestion.required ? 'prompt' : 'hint']: value } : {}
+                      setMaskQuestion(null); setMaskHint('')
+                      void runComputeDirect(key, params)
+                    }}>Analyze</button>
+                  </div>
+                </>
+              )}
             </div>
-            <p className="mask-question-note">
-              This is a visual analysis layer. It changes viewport colours or overlays,
-              but does not alter the GLB geometry.
-            </p>
-            {!maskQuestion.required && !maskQuestion.wantsHint ? (
-              <>
-                <div className="mask-question-label">Add a custom hint for Gemini?</div>
-                <div className="mask-question-choices" role="group" aria-label="Use a custom Gemini hint">
-                  <button onClick={() => {
-                    const key = maskQuestion.key
-                    setMaskQuestion(null)
-                    void runComputeDirect(key)
-                  }}>No, analyze automatically</button>
-                  <button className="primary"
-                    onClick={() => setMaskQuestion((q) => q ? { ...q, wantsHint: true } : q)}>
-                    Yes, add a hint
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <label className="mask-question-label" htmlFor="mask-hint">
-                  {maskQuestion.required ? 'What should be segmented?' : 'Optional hint (maximum 15 words)'}
-                </label>
-                <input id="mask-hint" className="mask-question-input" autoFocus value={maskHint}
-                  placeholder={maskQuestion.required ? 'e.g. bottle cap or handle' : 'e.g. load-bearing base'}
-                  onChange={(e) => setMaskHint(e.target.value)} />
-                <div className="mask-question-choices">
-                  <button onClick={() => { setMaskQuestion(null); setMaskHint('') }}>Cancel</button>
-                  <button className="primary" disabled={maskQuestion.required && !maskHint.trim()} onClick={() => {
-                    const key = maskQuestion.key
-                    const value = clampWords(maskHint.trim(), 15)
-                    const params = value ? { [maskQuestion.required ? 'prompt' : 'hint']: value } : {}
-                    setMaskQuestion(null); setMaskHint('')
-                    void runComputeDirect(key, params)
-                  }}>Analyze</button>
-                </div>
-              </>
-            )}
-          </div>
+          )}
+        </div>
+        {hasContent && (
+          <MaskRail catalog={catalog} masks={masks} surface={surface} overlays={overlays}
+            computing={computing} errors={maskErrors} onSurface={onSurface} onOverlay={onOverlay} />
         )}
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
       </div>
-      {hasContent && (
-        <MaskRail catalog={catalog} masks={masks} surface={surface} overlays={overlays}
-          computing={computing} errors={maskErrors} onSurface={onSurface} onOverlay={onOverlay} />
-      )}
-      </div>
-    </section>
+    </section >
   )
 }
 
@@ -1320,9 +1291,9 @@ function CapResultCard({ result, onAgain, onDone }: { result: CapResult; onAgain
   const how = mode === 'auto' ? 'Auto-fill' : 'The cap'
   const sub = status === 'sealed' ? 'The solid is closed. Mass & volume are now exact.'
     : status === 'refined' ? `${how} closed some openings. Mass & volume updated; other open areas remain.`
-    : status === 'shell' ? `This is a shell mesh (thin one-sided surfaces). ${mode === 'auto' ? 'Auto-fill can’t make it solid' : 'A patch was added, but the region stays a shell'}. Mass & volume are area-based, which is the correct model here.`
-    : status === 'none' ? (mode === 'auto' ? 'No closeable openings were found.' : 'The plane didn’t cover a hole. Move or resize it over an opening, then try again.')
-    : (message || 'The re-bake failed.')
+      : status === 'shell' ? `This is a shell mesh (thin one-sided surfaces). ${mode === 'auto' ? 'Auto-fill can’t make it solid' : 'A patch was added, but the region stays a shell'}. Mass & volume are area-based, which is the correct model here.`
+        : status === 'none' ? (mode === 'auto' ? 'No closeable openings were found.' : 'The plane didn’t cover a hole. Move or resize it over an opening, then try again.')
+          : (message || 'The re-bake failed.')
   const dMass = after.mass - before.mass
   const dVol = (after.vol - before.vol) * 1000
   const wtLabel = status === 'shell' ? 'n/a · shell' : watertight ? 'yes · sealed' : 'no · still open'

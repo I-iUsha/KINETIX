@@ -6,15 +6,10 @@ genuine end-to-end check of the studio's backend, not a mock.
 """
 from __future__ import annotations
 
-<<<<<<< HEAD
 import io
 import json
 
 import pytest
-=======
-import json
-
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 import trimesh
 from fastapi.testclient import TestClient
 
@@ -130,7 +125,6 @@ def test_validate_then_repair_flips_stability_to_green():
 def test_validate_unknown_asset_is_404():
     r = client.post("/validate", json={"object": "nope", "pos": [0, 0, 0]})
     assert r.status_code == 404
-<<<<<<< HEAD
 
 
 def test_export_repaired_returns_transformed_glb():
@@ -147,5 +141,3 @@ def test_export_repaired_returns_transformed_glb():
     assert "box_repaired.glb" in r.headers["content-disposition"]
     repaired = trimesh.load(io.BytesIO(r.content), file_type="glb", force="scene", process=False)
     assert repaired.bounds.mean(axis=0)[0] == pytest.approx(2.0)
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6

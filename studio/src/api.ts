@@ -102,8 +102,10 @@ export function classifyCap(before: PAP | undefined, after: PAP, mode: 'auto' | 
     after.geometry.watertight && !before?.geometry.watertight ? 'sealed'
       : shellMesh ? 'shell'
         : changed ? 'refined' : 'none'
-  return { status, mode, before: { mass: bMass, vol: bVol }, after: { mass: aMass, vol: aVol },
-    watertight: after.geometry.watertight, sealed, total: solids.length, shellMesh }
+  return {
+    status, mode, before: { mass: bMass, vol: bVol }, after: { mass: aMass, vol: aVol },
+    watertight: after.geometry.watertight, sealed, total: solids.length, shellMesh
+  }
 }
 export type BakeOpts = { materials?: Record<string, string>; profile?: string; decimate?: number; cap?: boolean; capPlane?: CapPlane; extras?: File[] }
 
@@ -221,7 +223,6 @@ export const validate = (object: string, pos: number[], quat = DEFAULT_QUAT, sca
   post<Verdict>('/validate', { object, pos, quat, scale, free_standing: freeStanding })
 export const repair = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
   post<Tf>('/repair', { object, pos, quat, scale })
-<<<<<<< HEAD
 export async function downloadRepaired(file: File, tf: Tf, extras: File[] = []): Promise<Blob> {
   const fd = new FormData()
   fd.append('mesh', file)
@@ -231,8 +232,6 @@ export async function downloadRepaired(file: File, tf: Tf, extras: File[] = []):
   if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail ?? 'repaired GLB export failed')
   return r.blob()
 }
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 export const commit = (object: string, pos: number[], quat = DEFAULT_QUAT, scale = DEFAULT_SCALE) =>
   post<{ ok: boolean }>('/commit', { object, pos, quat, scale })
 

@@ -1,4 +1,4 @@
-﻿# Handoff: Gemini API integration for kinetiX's AI semantic bake
+# Handoff: Gemini API integration for kinetiX's AI semantic bake
 
 **For:** a fresh Claude session helping the user (zajalist) set up the Gemini API key and
 finish/verify the AI semantic bake. **Context:** kinetiX is a spatial-validation studio.
@@ -64,12 +64,8 @@ It should print a JSON dict like
 - **`studio/semantics.py`** â€” the Gemini client.
   - `gemini_status() -> {available, sdk, key}` (used by `/health` + the UI).
   - `semantic_bake(images: list[bytes], hint="") -> dict` â€” sends PNG renders + a strict
-<<<<<<< HEAD
     JSON prompt to `gemini-3.5-flash` (override with `GEMINI_MODEL`), parses and validates
     the JSON. Raises `RuntimeError` if no key or the model returns invalid JSON.
-=======
-    JSON prompt to `gemini-3.5-flash`, parses the JSON. Raises `RuntimeError` if no key.
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   - Reads `GEMINI_API_KEY` / `GOOGLE_API_KEY`. Degrades gracefully (no key/SDK â†’ caller 503s).
 - **`studio/server.py`**
   - `POST /semantics` â€” multipart: `images[]` (PNG renders) + `asset_id` + `hint`. Calls

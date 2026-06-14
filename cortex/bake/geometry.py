@@ -1,4 +1,4 @@
-﻿"""
+"""
 cortex/bake/geometry.py â€” the geometric bake (Task 2).
 
 Load a mesh with ``trimesh`` and distil its *shape* into the frozen ``Geometry``
@@ -61,11 +61,7 @@ def bake_geometry_parts(
     ``"coacd"`` when CoACD produced the decomposition, else ``"fallback"``.
     """
     mesh = _load_mesh(mesh_path)
-<<<<<<< HEAD
     source_watertight = _preprocess(mesh)
-=======
-    _preprocess(mesh)
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
     parts, flag = _convex_parts(mesh)
 
@@ -74,11 +70,7 @@ def bake_geometry_parts(
         aabb=_aabb_half_extents(mesh),
         volume_m3=float(abs(mesh.volume)),
         convex_parts=len(parts),
-<<<<<<< HEAD
         watertight=source_watertight,
-=======
-        watertight=bool(mesh.is_watertight),
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     )
     return geometry, parts, flag
 
@@ -96,31 +88,22 @@ def _load_mesh(mesh_path: str) -> trimesh.Trimesh:
     return loaded
 
 
-<<<<<<< HEAD
 def _preprocess(mesh: trimesh.Trimesh) -> bool:
-=======
-def _preprocess(mesh: trimesh.Trimesh) -> None:
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     """Light, non-destructive cleanup so CoACD's fast path can trigger.
 
     Game-engine exports split vertices per corner and leave small gaps, which reads
     as non-watertight and pushes CoACD onto its slow voxel-remesh path. Merging weld
     seams, dropping degenerate/duplicate faces, and filling small holes recovers
-    connectivity *without* moving geometry (mass/CoM stay honest â€” we never voxel-
+    connectivity *without* moving geometry (mass/CoM stay honest — we never voxel-
     remesh, which would distort them). Best-effort: any step that fails is skipped.
     """
     if mesh.is_watertight:
-<<<<<<< HEAD
         return True
-=======
-        return
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     for step in (
         lambda: mesh.merge_vertices(),
         lambda: mesh.update_faces(mesh.nondegenerate_faces()),
         lambda: mesh.update_faces(mesh.unique_faces()),
         lambda: mesh.remove_unreferenced_vertices(),
-<<<<<<< HEAD
     ):
         try:
             step()
@@ -130,8 +113,6 @@ def _preprocess(mesh: trimesh.Trimesh) -> None:
     # only a decomposition aid and must not make an open source asset report as closed.
     source_watertight = bool(mesh.is_watertight)
     for step in (
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
         lambda: trimesh.repair.fill_holes(mesh),
         lambda: trimesh.repair.fix_normals(mesh),
     ):
@@ -139,10 +120,7 @@ def _preprocess(mesh: trimesh.Trimesh) -> None:
             step()
         except Exception:
             pass
-<<<<<<< HEAD
     return source_watertight
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
 
 def _aabb_half_extents(mesh: trimesh.Trimesh) -> list[float]:

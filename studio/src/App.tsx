@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
-=======
-import { useState, useCallback, useEffect, useMemo } from 'react'
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 import { IconDefs, Icon } from './Icons'
 import { Menubar } from './Menubar'
 import { AssetsPanel, type Asset } from './AssetsPanel'
@@ -18,16 +14,12 @@ import ConstraintGraph from './components/ConstraintGraph' // Fara's editable no
 import Palette from './components/Palette'
 import { INITIAL_SCENE, type SceneState } from './lib/engine'
 import { PROFILE_BASE } from './lib/bakeCatalog'
-<<<<<<< HEAD
-import { bake, bakeCached, convertUassets, validate, repair, downloadRepaired, commit, openWdf, health,
+import {
+  bake, bakeCached, convertUassets, validate, repair, downloadRepaired, commit, openWdf, health,
   saveProject, openProjectData, fetchProjectFile, classifyCap,
   type Verdict, type WdfDoc, type PAP, type Swept, type CapPlane, type CapResult,
-  type ProjectAsset, type AiSemantics, type Tf } from './api'
-=======
-import { bake, bakeCached, convertUassets, validate, repair, commit, openWdf, health,
-  saveProject, openProjectData, fetchProjectFile, classifyCap,
-  type Verdict, type WdfDoc, type PAP, type Swept, type CapPlane, type CapResult, type ProjectAsset } from './api'
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
+  type ProjectAsset, type AiSemantics, type Tf
+} from './api'
 import './App.css'
 
 // Hamilton product q = a ⊗ b (applies b first, then a), all [x,y,z,w].
@@ -47,7 +39,6 @@ export default function App() {
   const [recent, setRecent] = useState<RecentEntry[]>(() => getRecent())
   const [settings, setSettings] = useState<BakeSettings>({ profile: 'rigid_prop', simplify: false })
   const [ueAvailable, setUeAvailable] = useState(false)
-<<<<<<< HEAD
   const [geminiAvailable, setGeminiAvailable] = useState(false)
   const startNew = useCallback(() => setScreen('stage'), [])
 
@@ -55,13 +46,8 @@ export default function App() {
     health().then((h) => {
       setUeAvailable(!!h.ue?.available)
       setGeminiAvailable(!!h.gemini?.available)
-    }).catch(() => {})
+    }).catch(() => { })
   }, [])
-=======
-  const startNew = useCallback(() => setScreen('stage'), [])
-
-  useEffect(() => { health().then((h) => setUeAvailable(!!h.ue?.available)).catch(() => {}) }, [])
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
   // the static landing page (iframe) hands off here when "Run the studio" is clicked
   useEffect(() => {
@@ -106,16 +92,13 @@ export default function App() {
   const [rot, setRot] = useState<number[]>([0, 0, 0])   // placement rotation (euler°), feeds the quat
   const [scale, setScale] = useState(1)                 // uniform placement scale, feeds the transform
   const [verdict, setVerdict] = useState<Verdict | null>(null)
-<<<<<<< HEAD
   const [repairedTf, setRepairedTf] = useState<Tf | null>(null)
   const [gateError, setGateError] = useState<string | null>(null)
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   // Menubar "New project": return to the launch screen (not the bake stage) and wipe the
   // session, warning first if there's unsaved work in it.
   const newProject = useCallback(() => {
     if (assets.length > 0 &&
-        !window.confirm('Start a new project? Unsaved changes in the current one will be lost.')) return
+      !window.confirm('Start a new project? Unsaved changes in the current one will be lost.')) return
     setAssets([]); setSel(null); setWdf(null); setProjectName(null); setVerdict(null)
     setScreen('splash')
   }, [assets.length])
@@ -134,7 +117,6 @@ export default function App() {
   // door swing articulation (WP-6): the swept wedge shown in the viewport. The control
   // lives in the node editor (articulation is a graph concern), not the Properties pane.
   const [sweptGeo, setSweptGeo] = useState<Swept | null>(null)
-<<<<<<< HEAD
   const viewportCapture = useRef<(() => Promise<Blob[]>) | null>(null)
   const onCaptureReady = useCallback((capture: (() => Promise<Blob[]>) | null) => {
     viewportCapture.current = capture
@@ -143,8 +125,6 @@ export default function App() {
     () => viewportCapture.current?.() ?? Promise.resolve([]),
     [],
   )
-=======
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
   // node-editor scene (the constraint graph's static fallback context)
   const [scene] = useState<SceneState>(INITIAL_SCENE)
@@ -212,14 +192,10 @@ export default function App() {
   }, [leftW, rightW])
 
   // reset the loop when the selected asset changes
-<<<<<<< HEAD
   useEffect(() => {
     setPos([0, 0, 0]); setRot([0, 0, 0]); setScale(1); setVerdict(null)
     setRepairedTf(null); setGateError(null); setSweptGeo(null)
   }, [sel])
-=======
-  useEffect(() => { setPos([0, 0, 0]); setRot([0, 0, 0]); setScale(1); setVerdict(null); setSweptGeo(null) }, [sel])
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
 
   // shared bake options from the global settings (a per-mesh profile overrides .profile).
   // Profiles are rich presets; the bake gets the underlying engine archetype.
@@ -341,46 +317,32 @@ export default function App() {
 
   const onValidate = useCallback(async () => {
     if (!objId) return
-<<<<<<< HEAD
     setBusy(true); setGateError(null); setRepairedTf(null)
     try {
       setVerdict(await validate(objId, pos, quat(rot), scaleVec(), freeStanding))
     } catch (e) {
       setGateError(e instanceof Error ? e.message : 'Validation failed')
     } finally { setBusy(false) }
-=======
-    setBusy(true)
-    try { setVerdict(await validate(objId, pos, quat(rot), scaleVec(), freeStanding)) } finally { setBusy(false) }
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   }, [objId, pos, rot, quat, scaleVec, freeStanding])
 
   const onRepair = useCallback(async () => {
     if (!objId) return
-<<<<<<< HEAD
     setBusy(true); setGateError(null); setRepairedTf(null)
-=======
-    setBusy(true)
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     try {
       const tf = await repair(objId, pos, quat(rot), scaleVec())
       const rounded = tf.pos.map((v) => Math.round(v * 1000) / 1000) // mm precision, no e-notation
       setPos(rounded)
-<<<<<<< HEAD
       const checked = await validate(objId, rounded, tf.quat, tf.scale, freeStanding)
       setVerdict(checked)
       if (!checked.ok) throw new Error(`Repair could not clear the ${checked.stopped_at ?? 'failing'} gate`)
       setRepairedTf({ ...tf, pos: rounded })
     } catch (e) {
       setGateError(e instanceof Error ? e.message : 'Repair failed')
-=======
-      setVerdict(await validate(objId, rounded, tf.quat, scaleVec(), freeStanding))
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
     } finally { setBusy(false) }
   }, [objId, pos, rot, quat, scaleVec, freeStanding])
 
   const onCommit = useCallback(async () => {
     if (!objId) return
-<<<<<<< HEAD
     setBusy(true); setGateError(null)
     try { await commit(objId, pos, quat(rot), scaleVec()) }
     catch (e) { setGateError(e instanceof Error ? e.message : 'Commit failed') }
@@ -402,13 +364,6 @@ export default function App() {
       setGateError(e instanceof Error ? e.message : 'Repaired GLB download failed')
     } finally { setBusy(false) }
   }, [selected, repairedTf])
-
-=======
-    setBusy(true)
-    try { await commit(objId, pos, quat(rot), scaleVec()) } finally { setBusy(false) }
-  }, [objId, pos, rot, quat, scaleVec])
-
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
   // material-confirm loop: re-bake the selected mesh with the confirmed per-part
   // materials (now they drive physics) and lock them into the PAP.
   const onConfirmMaterials = useCallback(async (materials: Record<string, string>) => {
@@ -424,24 +379,22 @@ export default function App() {
   // asset's PAP so the viewport (CoM marker, plumb, force view) updates live.
   const onEditPap = useCallback((patch: { physical?: Partial<PAP['physical']>; geometry?: Partial<PAP['geometry']> }) => {
     setAssets((a) => a.map((x) => (x.id === sel && x.pap)
-      ? { ...x, pap: {
+      ? {
+        ...x, pap: {
           ...x.pap,
           physical: patch.physical ? { ...x.pap.physical, ...patch.physical } : x.pap.physical,
           geometry: patch.geometry ? { ...x.pap.geometry, ...patch.geometry } : x.pap.geometry,
-        } }
+        }
+      }
       : x))
   }, [sel])
 
-  
-<<<<<<< HEAD
+
   const onAiResult = useCallback((result: AiSemantics) => {
-=======
-  const onAiResult = useCallback((result: any) => {
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
-  setAssets((a) =>
-    a.map((x) =>
-      x.id === sel && x.pap
-        ? {
+    setAssets((a) =>
+      a.map((x) =>
+        x.id === sel && x.pap
+          ? {
             ...x,
             pap: {
               ...x.pap,
@@ -457,30 +410,30 @@ export default function App() {
               },
             },
           }
-        : x
+          : x
+      )
     )
-  )
   }, [sel])
 
-//   const onAiResult = useCallback((result: any) => {
-//   setAssets((a) =>
-//     a.map((x) =>
-//       x.id === sel && x.pap
-//         ? {
-//             ...x,
-//             pap: {
-//               ...x.pap,
-//               semantics: {
-//                 ...x.pap.semantics,
-//                 cls: result.class ?? x.pap.semantics.cls,
-//                 conf: result.confidence ?? x.pap.semantics.conf,
-//               },
-//             },
-//           }
-//         : x
-//     )
-//   )
-// }, [sel])
+  //   const onAiResult = useCallback((result: any) => {
+  //   setAssets((a) =>
+  //     a.map((x) =>
+  //       x.id === sel && x.pap
+  //         ? {
+  //             ...x,
+  //             pap: {
+  //               ...x.pap,
+  //               semantics: {
+  //                 ...x.pap.semantics,
+  //                 cls: result.class ?? x.pap.semantics.cls,
+  //                 conf: result.confidence ?? x.pap.semantics.conf,
+  //               },
+  //             },
+  //           }
+  //         : x
+  //     )
+  //   )
+  // }, [sel])
 
   // Closure: two ways to seal an open mesh — one-click AUTO hole-fill, or the MANUAL
   // plane tool. Both re-bake and report a result card with before→after mass/volume.
@@ -489,8 +442,10 @@ export default function App() {
   const onStartCap = useCallback(() => { setCapResult(null); setCapping(true) }, [])
   const errResult = (before: PAP | undefined, mode: 'auto' | 'manual', e: unknown): CapResult => {
     const m = before?.physical.mass_kg ?? 0, v = before?.geometry.volume_m3 ?? 0
-    return { status: 'error', mode, before: { mass: m, vol: v }, after: { mass: m, vol: v },
-      watertight: !!before?.geometry.watertight, message: e instanceof Error ? e.message : String(e) }
+    return {
+      status: 'error', mode, before: { mass: m, vol: v }, after: { mass: m, vol: v },
+      watertight: !!before?.geometry.watertight, message: e instanceof Error ? e.message : String(e)
+    }
   }
   const onApplyCap = useCallback(async (plane: CapPlane) => {
     if (!selected?.file) { setCapping(false); return }
@@ -525,8 +480,10 @@ export default function App() {
     for (const a of assets) {
       if (!a.file) continue   // declared-only assets (from a .wdf) carry no model file
       const all = [a.file, ...(a.extras ?? [])]
-      records.push({ id: a.id, name: a.name, main: a.file.name, files: all.map((f) => f.name),
-        profile: a.profile ?? a.pap?.profile, masks: a.pap?.parts, pap: a.pap })
+      records.push({
+        id: a.id, name: a.name, main: a.file.name, files: all.map((f) => f.name),
+        profile: a.profile ?? a.pap?.profile, masks: a.pap?.parts, pap: a.pap
+      })
       for (const f of all) files.push({ key: `${a.id}__${f.name}`, file: f })
     }
     if (!records.length) { alert('Nothing to save yet. Import and bake a mesh first.'); return }
@@ -541,8 +498,10 @@ export default function App() {
       const fetched = await Promise.all(rec.files.map((fn) => fetchProjectFile(name, rec.id, fn)))
       const main = fetched.find((f) => f.name === rec.main) ?? fetched[0]
       const extras = fetched.filter((f) => f !== main)
-      restored.push({ id: rec.id, name: rec.name, file: main, extras, pap: rec.pap,
-        profile: rec.profile, status: rec.pap ? 'ok' : 'queued' })
+      restored.push({
+        id: rec.id, name: rec.name, file: main, extras, pap: rec.pap,
+        profile: rec.profile, status: rec.pap ? 'ok' : 'queued'
+      })
     }
     setWdf(null)
     setVerdict(null); setCapResult(null); setSweptGeo(null)
@@ -620,13 +579,11 @@ export default function App() {
 
       {panels.gates && (
         <GateStack verdict={verdict}
-<<<<<<< HEAD
-          {...(canPlace ? { pos, setPos, rot, setRot, busy, onValidate, onRepair, onCommit,
+          {...(canPlace ? {
+            pos, setPos, rot, setRot, busy, onValidate, onRepair, onCommit,
             onDownloadRepaired, canDownloadRepaired: !!repairedTf, error: gateError,
-            freeStanding, setFreeStanding } : {})} />
-=======
-          {...(canPlace ? { pos, setPos, rot, setRot, busy, onValidate, onRepair, onCommit, freeStanding, setFreeStanding } : {})} />
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
+            freeStanding, setFreeStanding
+          } : {})} />
       )}
 
       <div className="row" style={{ '--aw': `${leftW}px`, '--pw': `${rightW}px` } as React.CSSProperties}>
@@ -642,23 +599,15 @@ export default function App() {
           pap={selected?.pap ?? null} pos={pos} rot={rot} scale={scale} verdict={verdict} status={selected?.status}
           swept={sweptGeo} onDropFiles={onAddFiles} capping={capping} onApplyCap={onApplyCap}
           onExitCap={() => setCapping(false)} busy={busy}
-<<<<<<< HEAD
           capResult={capResult} onCapAgain={onStartCap} onDismissCap={() => setCapResult(null)}
           onCaptureReady={onCaptureReady} />
-=======
-          capResult={capResult} onCapAgain={onStartCap} onDismissCap={() => setCapResult(null)} />
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
         {panels.properties && (
           <>
             <div className="col-resize" onPointerDown={startColResize('r')} role="separator" aria-orientation="vertical" title="Drag to resize" />
             <Properties pap={selected?.pap ?? null}
               onConfirm={onConfirmMaterials} onCapOpenings={onStartCap} onAutoFill={onAutoFill} capping={capping}
-<<<<<<< HEAD
               onEditPap={onEditPap} onAiResult={onAiResult} getImages={getViewportImages}
               geminiAvailable={geminiAvailable} busy={busy} declared={selected?.wdf}
-=======
-              onEditPap={onEditPap} onAiResult={onAiResult} busy={busy} declared={selected?.wdf}
->>>>>>> d1104186f8555bb012c34331cfb3c290dd02c8e6
               footer={selected?.pap ? <PlacementTool assetId={selected.pap.asset_id} obb={selected.pap.geometry.obb} /> : undefined}
               {...(canPlace ? { scale, onScale: setScale } : {})} />
           </>
